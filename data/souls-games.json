@@ -1,0 +1,26 @@
+{
+  "id": "souls-games",
+  "name": "Souls Games Ranking",
+  "description": "My personal ranking of FromSoft games",
+  "parentId": null,
+  "children": ["souls-bosses", "souls-areas"],
+  "schema": [
+    { "id": "tier", "name": "Tier", "type": "tier", "options": ["S", "A", "B", "C", "D"] },
+    { "id": "difficulty", "name": "Difficulty", "type": "rating", "max": 10 },
+    { "id": "atmosphere", "name": "Atmosphere", "type": "rating", "max": 10 },
+    { "id": "notes", "name": "Notes", "type": "text" }
+  ],
+  "items": [
+    {
+      "id": "elden-ring",
+      "name": "Elden Ring",
+      "imageUrl": "/images/elden-ring.jpg",
+      "values": {
+        "tier": "S",
+        "difficulty": 8,
+        "atmosphere": 10,
+        "notes": "Open world masterpiece"
+      }
+    }
+  ]
+}
