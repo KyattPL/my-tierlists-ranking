@@ -369,7 +369,7 @@ export default function TierlistApp() {
         <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <Home className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">Kyatt's tierlists</h1>
+                <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">Kyatt&apos;s tierlists</h1>
             </div>
             <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="p-2 rounded-full hover:bg-gray-100
              dark:hover:bg-gray-700" aria-label="Toggle theme">
