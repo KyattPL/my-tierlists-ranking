@@ -295,12 +295,29 @@ export default function TierlistApp() {
   const [searchQuery, setSearchQuery] = useState('');
   const [theme, setTheme] = useState<'light' | 'dark'>('light');
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: 'asc' | 'desc' } | null>(null);
-  // NEW: State for mobile sidebar visibility
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
-    if (theme === 'dark') document.documentElement.classList.add('dark');
-    else document.documentElement.classList.remove('dark');
+    const storedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+
+    if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
   }, [theme]);
 
   const rootNodes = mockData.filter(t => !t.parentId);
@@ -352,7 +369,7 @@ export default function TierlistApp() {
         <div className="p-4 border-b dark:border-gray-700 flex items-center justify-between">
             <div className="flex items-center gap-2">
                 <Home className="w-5 h-5 text-gray-700 dark:text-gray-300" />
-                <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">My Tierlists</h1>
+                <h1 className="text-lg font-bold text-gray-800 dark:text-gray-100">Kyatt's tierlists</h1>
             </div>
             <button onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')} className="p-2 rounded-full hover:bg-gray-100
              dark:hover:bg-gray-700" aria-label="Toggle theme">
@@ -371,7 +388,7 @@ export default function TierlistApp() {
              <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">Tierlists</h2>
           </div>
           {rootNodes.map(node => <TreeNode key={node.id} node={node} expanded={expandedNodes} onToggle={toggleNode} selected={selectedId} onSelect={handleSelectNode} allNodes={mockData} />)}
-          <div className='border-b'/>
+          <div className='border-b border-gray-700'/>
         </div>
       </div>
 
