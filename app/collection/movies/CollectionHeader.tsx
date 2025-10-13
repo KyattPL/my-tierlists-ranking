@@ -6,16 +6,28 @@ import { Clapperboard, Home, Sun, Moon } from 'lucide-react';
 
 export default function CollectionHeader() {
   // State to manage the current theme
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState<'light'|'dark'>('light');
 
-  // Effect to apply the theme class to the <html> element
   useEffect(() => {
-    // On initial load, you might want to check localStorage or system preference
-    // For simplicity, we'll just apply the state.
+    const storedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)'
+    ).matches;
+
+    if (storedTheme === 'dark' || (!storedTheme && prefersDark)) {
+      setTheme('dark');
+    } else {
+      setTheme('light');
+    }
+  }, []);
+
+  useEffect(() => {
     if (theme === 'dark') {
       document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
     } else {
       document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
     }
   }, [theme]);
 
