@@ -106,13 +106,29 @@ async function getMovieData(): Promise<CollectionItem[]> {
   });
 }
 
+async function getLastSyncTime(): Promise<string | null> {
+  const timestampPath = path.join(process.cwd(), 'data', 'last-sync.txt');
+  
+  try {
+    if (fs.existsSync(timestampPath)) {
+      const timestamp = fs.readFileSync(timestampPath, 'utf-8').trim();
+      return timestamp;
+    }
+  } catch (error) {
+    console.error('Error reading last-sync.txt:', error);
+  }
+  
+  return null;
+}
+
 export default async function MovieCollectionPage() {
   const movies = await getMovieData();
+  const lastSync = await getLastSyncTime();
 
   return (
     <div className="flex-1 flex flex-col overflow-hidden">
       {/* Header (No changes here) */}
-      <CollectionHeader />
+      <CollectionHeader lastSync={lastSync} />
 
       {/* Content Area (No changes here) */}
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 bg-gray-50 dark:bg-gray-900">

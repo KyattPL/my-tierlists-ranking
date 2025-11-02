@@ -32,13 +32,15 @@ const syncMovieData = async () => {
     // Copy the file
     await fs.copyFile(sourceFile, destFile);
     console.log(`Successfully copied movie data from ${sourceFile} to ${destFile}`);
+
+    const timestampPath = path.join(__dirname, '../data/last-sync.txt');
+    const timestamp = new Date().toISOString();
+
+    fs.writeFile(timestampPath, timestamp, 'utf-8');
   } catch (error) {
     console.error(`Error syncing movie data: ${error.message}`);
     console.error('Please ensure the path is correct and the file exists.');
-    // Write an empty array to the destination to allow the build to succeed
     await fs.writeFile(destFile, '[]');
-    // We don't exit with 1, to allow builds to succeed even without the file.
-    // The page will just show "No movies found".
   }
 };
 
