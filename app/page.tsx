@@ -43,12 +43,12 @@ export interface TierList extends BaseNode {
 
 export type AppNode = Category | TierList;
 
-const TierBadge = ({ tier }: {tier: TIER}) => {
+export const TierBadge = ({ tier }: {tier: TIER}) => {
   const colors = { S: 'bg-red-500', A: 'bg-orange-500', B: 'bg-yellow-500', C: 'bg-green-500', D: 'bg-blue-500', F: 'bg-gray-500' };
   return <div className={`${colors[tier] || 'bg-gray-500'} text-white font-bold px-3 py-1 rounded text-sm`}>{tier}</div>;
 };
 
-const RatingStars = ({ value, max }: {value: number, max: number}) => (
+export const RatingStars = ({ value, max }: {value: number, max: number}) => (
   <div className="flex items-center gap-1">
     {[...Array(max)].map((_, i) => <Star key={i} className={`w-4 h-4 ${i < value ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300 dark:text-gray-600'}`} />)}
     <span className="text-sm text-gray-600 dark:text-gray-400 ml-1">{value}/{max}</span>
@@ -112,7 +112,7 @@ const CategoryView = ({ category, allNodes, onSelect }: { category: Category; al
   );
 };
 
-const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierlist: TierList; viewMode: 'tier' | 'table'; sortConfig: { key: string; direction: 'asc' | 'desc' } | null; onSort: (key: string) => void; }) => {
+export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierlist: TierList; viewMode: 'tier' | 'table'; sortConfig: { key: string; direction: 'asc' | 'desc' } | null; onSort: (key: string) => void; }) => {
   const groupedByTier = useMemo(() => {
     const tierColumn = tierlist.schema.find(col => col.type === 'tier');
     if (!tierColumn) return null;
