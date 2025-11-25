@@ -134,7 +134,7 @@ export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierl
             </div>
             <div className="flex-1 bg-gray-800 p-2 min-h-[100px] sm:min-h-[120px]">
               <div className="flex flex-wrap gap-2">
-                {items.map((item, index) => {
+                {items.map(item => {
                     const currentRank = globalRank++;
 
                     return (
