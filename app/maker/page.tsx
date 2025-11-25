@@ -3,7 +3,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { Plus, Trash2, Copy, ArrowLeft, Code, Eye, Settings, Database, FolderPlus, ArrowUp, ArrowDown } from 'lucide-react';
 import Link from 'next/link';
-import { TierList, TierlistView, Category } from '@/app/page';
+import { TierList, TierlistView, Category } from '@/components/TierListShared';
 import { tierlistData } from '@/data/tierlists-combined';
 
 // --- Types & Helpers ---
