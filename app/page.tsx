@@ -122,6 +122,8 @@ export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierl
     return groups;
   }, [tierlist]);
 
+  let globalRank = 1;
+
   if (viewMode === 'tier' && groupedByTier) {
     return (
       <div className="border rounded-lg overflow-hidden bg-gray-900">
@@ -132,22 +134,32 @@ export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierl
             </div>
             <div className="flex-1 bg-gray-800 p-2 min-h-[100px] sm:min-h-[120px]">
               <div className="flex flex-wrap gap-2">
-                {items.map(item => (
-                  <div key={item.id} className="bg-gray-700 border-2 border-gray-600 rounded p-2 hover:border-gray-400 transition-colors cursor-pointer group" title={item.name}>
-                    <div className="font-medium text-white text-sm mb-1">{item.name}</div>
-                    <div className="space-y-1">
-                      {tierlist.schema.filter(col => col.type !== 'tier').slice(0, 2).map(col => {
-                        const value = item.values[col.id];
-                        return (
-                          <div key={col.id} className="text-xs text-gray-300">
-                            <span className="text-gray-400">{col.name}: </span>
-                            {col.type === 'rating' && typeof value === 'number' ? <span className="text-yellow-400">★{value}/{col.max}</span> : <span>{value}</span>}
-                          </div>
+                {items.map((item, index) => {
+                    const currentRank = globalRank++;
+
+                    return (
+                            <div key={item.id} className="relative bg-gray-700 border-2 border-gray-600 rounded p-2 hover:border-gray-400 transition-colors cursor-pointer group" title={item.name}>
+                                {!sortConfig && (
+                                    <div className="absolute -top-2 -left-2 bg-black/80 text-white text-[10px] font-mono px-1.5 py-0.5 rounded-full border border-gray-600 z-10 shadow-sm">
+                                        #{currentRank}
+                                    </div>
+                                )}
+                                <div className="font-medium text-white text-sm mb-1">{item.name}</div>
+                                <div className="space-y-1">
+                                {tierlist.schema.filter(col => col.type !== 'tier').slice(0, 2).map(col => {
+                                    const value = item.values[col.id];
+                                    return (
+                                    <div key={col.id} className="text-xs text-gray-300">
+                                        <span className="text-gray-400">{col.name}: </span>
+                                        {col.type === 'rating' && typeof value === 'number' ? <span className="text-yellow-400">★{value}/{col.max}</span> : <span>{value}</span>}
+                                    </div>
+                                    );
+                                })}
+                                </div>
+                            </div>
                         );
-                      })}
-                    </div>
-                  </div>
-                ))}
+                    }
+                )}
                 {items.length === 0 && <div className="text-gray-500 text-sm italic self-center">Empty tier</div>}
               </div>
             </div>
@@ -165,7 +177,11 @@ export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierl
         <table className="w-full border-collapse">
           <thead>
             <tr className="bg-gray-50 border-b dark:bg-gray-700 dark:border-gray-600">
-              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300"><button onClick={() => onSort('name')} className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-white">Name {sortConfig?.key === 'name' && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}</button></th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300">
+                <button onClick={() => onSort('name')} className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-white">
+                    Name {sortConfig?.key === 'name' ? (sortConfig.direction === 'asc' ? <ArrowUp /> : <ArrowDown />) : <span className="text-gray-400 opacity-50 ml-1">↕</span>}
+                </button>
+              </th>
               {tierlist.schema.map(col => (<th key={col.id} className="px-4 py-3 text-left text-sm font-semibold text-gray-700 dark:text-gray-300"><button onClick={() => onSort(col.id)} className="flex items-center gap-1 hover:text-gray-900 dark:hover:text-white">{col.name} {sortConfig?.key === col.id && (sortConfig.direction === 'asc' ? <ArrowUp className="w-3 h-3" /> : <ArrowDown className="w-3 h-3" />)}</button></th>))}
             </tr>
           </thead>
@@ -246,9 +262,15 @@ export default function TierlistApp() {
   };
 
   const handleSort = (key: string) => {
-    let direction: 'asc' | 'desc' = 'asc';
-    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') direction = 'desc';
-    setSortConfig({ key, direction });
+      setSortConfig(current => {
+          if (current && current.key === key && current.direction === 'desc') {
+              return null; 
+          }
+          if (current && current.key === key && current.direction === 'asc') {
+              return { key, direction: 'desc' };
+          }
+          return { key, direction: 'asc' };
+      });
   };
 
   const processedTierlist = useMemo(() => {
