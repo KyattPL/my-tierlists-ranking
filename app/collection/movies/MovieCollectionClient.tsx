@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { CollectionItem, ItemStatus } from './page';
 import { Search, Star, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Info } from 'lucide-react';
-import Image from 'next/image';
+// import Image from 'next/image';
 
 const ITEMS_PER_PAGE = 20;
 
