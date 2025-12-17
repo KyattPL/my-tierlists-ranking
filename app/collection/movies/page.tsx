@@ -17,7 +17,7 @@ export interface CollectionItem {
   imdbRating: number;
   runtime: string;
   poster: string; // URL to the poster image
-  totalSeasons?: number; // Optional for TV series
+  totalSeasons: number; // Optional for TV series
   country: string;
   rating: number; // Your personal rating
   status: ItemStatus;

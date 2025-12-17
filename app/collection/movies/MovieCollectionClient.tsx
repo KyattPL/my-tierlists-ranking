@@ -48,9 +48,10 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
 
     if (typeFilter !== 'All') {
       if (typeFilter === 'Movie') {
-        filtered = filtered.filter(item => item.totalSeasons === undefined);
+        filtered.forEach(i => console.log(i.totalSeasons));
+        filtered = filtered.filter(item => item.totalSeasons === 0);
       } else if (typeFilter === 'TV Series') {
-        filtered = filtered.filter(item => item.totalSeasons !== undefined);
+        filtered = filtered.filter(item => item.totalSeasons > 0);
       }
     }
 
@@ -142,7 +143,7 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
       <div className="space-y-4 md:hidden">
         {paginatedMovies.map(item => (
           <div key={item.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg border dark:border-black p-4 flex gap-4">
-            <div className="w-24 flex-shrink-0"><Image src={item.poster} alt={`Poster for ${item.title}`} className="w-full h-auto object-cover rounded" /></div>
+            {/* <div className="w-24 flex-shrink-0"><Image src={item.poster} alt={`Poster for ${item.title}`} className="w-full h-auto object-cover rounded" width={96} height={20} /></div> */}
             <div className="flex-grow">
               <div className="flex justify-between items-start">
                 <h3 className="font-bold text-black dark:text-gray-400 text-lg mb-1 pr-2">{item.title} ({item.year})</h3>
