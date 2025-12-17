@@ -16,12 +16,15 @@ const StatusBadge = ({ status }: { status: ItemStatus }) => {
   return <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[status]}`}>{status}</span>;
 };
 
+type TypeFilter = 'All' | 'Movie' | 'TV Series';
+
 export default function MovieCollectionClient({ initialMovies }: { initialMovies: CollectionItem[] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortConfig, setSortConfig] = useState<{ key: keyof CollectionItem; direction: 'asc' | 'desc' } | null>({ key: 'rating', direction: 'desc' });
   const [currentPage, setCurrentPage] = useState(1);
   const [genreFilter, setGenreFilter] = useState('All');
   const [statusFilter, setStatusFilter] = useState<ItemStatus | 'All'>('All');
+  const [typeFilter, setTypeFilter] = useState<TypeFilter>('All');
 
   const genres = useMemo(() => {
     const allGenres = initialMovies.flatMap(m => 
@@ -32,8 +35,9 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
   }, [initialMovies]);
 
   const statuses: (ItemStatus | 'All')[] = ['All', 'in-progress', 'undecided', 'undefined'];
+  const types: TypeFilter[] = ['All', 'Movie', 'TV Series'];
 
-    const filteredAndSortedMovies = useMemo(() => {
+  const filteredAndSortedMovies = useMemo(() => {
     let filtered = initialMovies;
 
     if (genreFilter !== 'All') {
@@ -42,11 +46,17 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
 
     if (statusFilter !== 'All') filtered = filtered.filter(item => item.status === statusFilter);
 
+    if (typeFilter !== 'All') {
+      if (typeFilter === 'Movie') {
+        filtered = filtered.filter(item => item.totalSeasons === undefined);
+      } else if (typeFilter === 'TV Series') {
+        filtered = filtered.filter(item => item.totalSeasons !== undefined);
+      }
+    }
+
     if (searchQuery) {
       filtered = filtered.filter(item =>
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.director.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.actors.toLowerCase().includes(searchQuery.toLowerCase())
+        item.title.toLowerCase().includes(searchQuery.toLowerCase())
       );
     }
 
@@ -62,7 +72,7 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
     }
 
     return filtered;
-  }, [initialMovies, searchQuery, sortConfig, genreFilter, statusFilter]);
+  }, [initialMovies, searchQuery, sortConfig, genreFilter, statusFilter, typeFilter]);
 
   const totalPages = Math.ceil(filteredAndSortedMovies.length / ITEMS_PER_PAGE);
   const paginatedMovies = filteredAndSortedMovies.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
@@ -88,11 +98,12 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
       <div className="p-4 bg-white dark:bg-gray-800 rounded-lg border border-black space-y-4">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-700 dark:text-gray-400" />
-          <input type="text" placeholder="Search by title, director, actors..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-black dark:text-white text-gray-700" />
+          <input type="text" placeholder="Search by title..." value={searchQuery} onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-black dark:text-white text-gray-700" />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <select value={genreFilter} onChange={e => { setGenreFilter(e.target.value); setCurrentPage(1); }} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-black dark:text-white text-gray-700"><option value="All">All Genres</option>{genres.slice(1).map(g => <option key={g} value={g}>{g}</option>)}</select>
           <select value={statusFilter} onChange={e => { setStatusFilter(e.target.value as ItemStatus | 'All'); setCurrentPage(1); }} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-black dark:text-white text-gray-700">{statuses.map(s => <option key={s} value={s}>{s === 'All' ? 'All Statuses' : s}</option>)}</select>
+          <select value={typeFilter} onChange={e => { setTypeFilter(e.target.value as TypeFilter); setCurrentPage(1); }} className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:border-black dark:text-white text-gray-700">{types.map(t => <option key={t} value={t}>{t === 'All' ? 'All Types' : t}</option>)}</select>
         </div>
       </div>
 
