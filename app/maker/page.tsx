@@ -88,7 +88,7 @@ export default function TierlistMaker() {
                 {activeTab === 'general' && <GeneralTab data={data} createdCategories={createdCategories} setData={setData} setCreatedCategories={setCreatedCategories} />}
                 {activeTab === 'schema' && <SchemaTab data={data} setData={setData} />}
                 {activeTab === 'items' && <ItemsTab data={data} setData={setData} />}
-                {activeTab === 'gui' && <GuiTab data={data} setData={setData} />}
+                {activeTab === 'gui' && <GuiTab data={data} setData={setData} createdCategories={createdCategories} setCreatedCategories={setCreatedCategories} />}
                 {activeTab === 'preview' && <PreviewTab data={data} />}
                 {activeTab === 'code' && <CodeTab data={data} createdCategories={createdCategories} />}
                 </div>
