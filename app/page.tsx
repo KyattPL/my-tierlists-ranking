@@ -14,6 +14,7 @@ interface SchemaColumn {
   type: 'tier' | 'rating' | 'text';
   options?: string[];
   max?: number;
+  min?: number;
 }
 
 interface TierListItem {
