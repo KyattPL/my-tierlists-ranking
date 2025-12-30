@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { GripVertical, X, Plus, Trash2, ChevronDown, ChevronRight, FolderPlus } from 'lucide-react';
-import { TierList, Category } from '@/components/TierListShared';
+import { TierList, Category, TierListItem } from '@/components/TierListShared';
 import { tierlistData } from '@/data/tierlists-combined';
 
 interface Props {
@@ -16,8 +16,11 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverTier, setDragOverTier] = useState<string | null>(null);
   const [dragOverItem, setDragOverItem] = useState<{ id: string; position: 'before' | 'after' } | null>(null);
+  const [schemaExpanded, setSchemaExpanded] = useState<Record<string, boolean>>({});
+  const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCategoryCreator, setShowCategoryCreator] = useState(false);
   const [newCatForm, setNewCatForm] = useState({ name: '', id: '', parentId: '' });
+  const [createForm, setCreateForm] = useState<{ tier: string; name: string; [key: string]: string | number }>({ tier: 'S', name: '' });
 
   const tierColumn = useMemo(() => data.schema.find(c => c.type === 'tier'), [data.schema]);
 
@@ -42,7 +45,7 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
 
   const groupedItems = useMemo(() => {
     if (!tierColumn?.options) return {};
-    const map: Record<string, TierList['items']> = {};
+    const map: Record<string, TierListItem[]> = {};
     tierColumn.options.forEach(t => (map[t] = []));
     data.items.forEach(item => {
       const tier = item.values[tierColumn.id] as string;
@@ -58,7 +61,6 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
     position?: 'before' | 'after'
   ) => {
     if (!tierColumn) return;
-    
     if (targetId === sourceId) return;
 
     const sourceIndex = data.items.findIndex(i => i.id === sourceId);
@@ -98,34 +100,43 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
     setData(prev => ({ ...prev, items: newItems }));
   }, [data.items, tierColumn, setData]);
 
-  const addItem = (tier: string) => {
+  const addItemViaModal = () => {
+    if (!createForm.name.trim()) {
+      alert('Item name is required');
+      return;
+    }
+
     const id = `item_${Date.now()}`;
-    const values: Record<string, string | number> = {};
+    const values: Record<string, string | number> = { [tierColumn!.id]: createForm.tier };
+    
     data.schema.forEach(col => {
-      if (col.type === 'tier') values[col.id] = tier;
-      else if (col.type === 'rating') values[col.id] = col.min || 0;
-      else values[col.id] = '';
+      if (col.type === 'tier') return;
+      if (col.type === 'rating') values[col.id] = createForm[col.id] ?? col.min ?? 0;
+      if (col.type === 'text') values[col.id] = createForm[col.id] ?? '';
     });
-    setData(prev => ({ ...prev, items: [...prev.items, { id, name: 'New Item', values }] }));
+
+    setData(prev => ({ ...prev, items: [...prev.items, { id, name: createForm.name, values }] }));
+    setCreateForm({ tier: 'S', name: '' });
+    setShowCreateModal(false);
   };
 
   const deleteItem = (id: string) => {
     setData(prev => ({ ...prev, items: prev.items.filter(i => i.id !== id) }));
   };
 
-  const updateItemValue = (itemId: string, key: string, value: string | number) => {
-    setData(prev => ({
-      ...prev,
-      items: prev.items.map(i => i.id === itemId ? { ...i, values: { ...i.values, [key]: value } } : i)
-    }));
-  };
+//   const updateItemValue = (itemId: string, key: string, value: string | number) => {
+//     setData(prev => ({
+//       ...prev,
+//       items: prev.items.map(i => i.id === itemId ? { ...i, values: { ...i.values, [key]: value } } : i)
+//     }));
+//   };
 
-  const updateItemName = (itemId: string, name: string) => {
-    setData(prev => ({
-      ...prev,
-      items: prev.items.map(i => i.id === itemId ? { ...i, name } : i)
-    }));
-  };
+//   const updateItemName = (itemId: string, name: string) => {
+//     setData(prev => ({
+//       ...prev,
+//       items: prev.items.map(i => i.id === itemId ? { ...i, name } : i)
+//     }));
+//   };
 
   const addSchemaColumn = () => {
     const newId = `col_${Date.now()}`;
@@ -138,6 +149,10 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
 
   const updateSchemaColumn = (id: string, field: string, value: string | number) => {
     setData(prev => ({ ...prev, schema: prev.schema.map(c => c.id === id ? { ...c, [field]: value } : c) }));
+  };
+
+  const toggleSchemaExpand = (id: string) => {
+    setSchemaExpanded(prev => ({ ...prev, [id]: !prev[id] }));
   };
 
   const handleCreateCategory = () => {
@@ -164,35 +179,115 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
     return (
       <div className="p-8 max-w-2xl mx-auto bg-red-50 dark:bg-red-900/20 border border-red-300 rounded">
         <h2 className="font-bold text-red-700 dark:text-red-300">GUI Maker unavailable</h2>
-        <p className="text-sm mt-2">
-          A Tier column (type: <code>tier</code>) is required to use GUI Maker.
-        </p>
+        <p className="text-sm mt-2">A Tier column is required to use GUI Maker.</p>
       </div>
     );
   }
 
   return (
     <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+      {/* Create Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800">
+              <h2 className="text-lg font-bold">Create New Item</h2>
+              <button onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <div className="p-4 space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Item Name *</label>
+                <input
+                  type="text"
+                  value={createForm.name}
+                  onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter item name..."
+                  autoFocus
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-1">Tier *</label>
+                <select
+                  value={createForm.tier}
+                  onChange={(e) => setCreateForm({ ...createForm, tier: e.target.value })}
+                  className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {tierColumn.options.map(tier => (
+                    <option key={tier} value={tier}>{tier}</option>
+                  ))}
+                </select>
+              </div>
+
+              {data.schema.map(col => {
+                if (col.type === 'tier') return null;
+                return (
+                  <div key={col.id}>
+                    <label className="block text-sm font-medium mb-1">{col.name}</label>
+                    {col.type === 'rating' ? (
+                      <input
+                        type="number"
+                        min={col.min || 0}
+                        max={col.max || 10}
+                        value={createForm[col.id] ?? col.min ?? 0}
+                        onChange={(e) => setCreateForm({ ...createForm, [col.id]: Number(e.target.value) })}
+                        className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    ) : (
+                      <textarea
+                        value={createForm[col.id] ?? ''}
+                        onChange={(e) => setCreateForm({ ...createForm, [col.id]: e.target.value })}
+                        className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        rows={2}
+                      />
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+
+            <div className="p-4 border-t dark:border-gray-700 flex gap-2 justify-end sticky bottom-0 bg-white dark:bg-gray-800">
+              <button
+                onClick={() => setShowCreateModal(false)}
+                className="px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={addItemViaModal}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Create Item
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-80' : 'w-0'} transition-all duration-300 border-r dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden flex flex-col`}>
-        <div className="p-4 border-b dark:border-gray-700">
+      <div className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-300 border-r dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden flex flex-col`}>
+        <div className="p-3 border-b dark:border-gray-700">
           <div className="flex gap-2">
             <button
               onClick={() => setSidebarSection('general')}
-              className={`flex-1 px-3 py-2 rounded text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                 sidebarSection === 'general'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
               }`}
             >
               General
             </button>
             <button
               onClick={() => setSidebarSection('schema')}
-              className={`flex-1 px-3 py-2 rounded text-sm font-medium transition-colors ${
+              className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
                 sidebarSection === 'schema'
                   ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
               }`}
             >
               Schema
@@ -200,18 +295,9 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-3">
           {sidebarSection === 'general' ? (
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Tierlist ID</label>
-                <input
-                  type="text"
-                  value={data.id}
-                  onChange={(e) => setData(prev => ({ ...prev, id: e.target.value }))}
-                  className="w-full px-2 py-1.5 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:border-blue-500"
-                />
-              </div>
+            <div className="space-y-3">
               <div>
                 <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Name</label>
                 <input
@@ -227,10 +313,9 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                   value={data.description}
                   onChange={(e) => setData(prev => ({ ...prev, description: e.target.value }))}
                   className="w-full px-2 py-1.5 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:border-blue-500"
-                  rows={3}
+                  rows={2}
                 />
               </div>
-              
               <div className="border-t dark:border-gray-700 pt-4">
                 <div className="flex justify-between items-center mb-2">
                   <label className="block text-xs font-bold text-gray-500 uppercase">Parent Category</label>
@@ -297,9 +382,9 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
               </div>
             </div>
           ) : (
-            <div className="space-y-3">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-sm font-bold text-gray-700 dark:text-gray-300">Fields</h3>
+            <div className="space-y-2">
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="text-sm font-bold">Fields</h3>
                 <button
                   onClick={addSchemaColumn}
                   className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-1"
@@ -308,66 +393,71 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                 </button>
               </div>
               {data.schema.map(col => (
-                <div key={col.id} className="p-3 bg-gray-50 dark:bg-gray-700 rounded border dark:border-gray-600">
-                  <div className="flex justify-between items-start mb-2">
-                    <input
-                      type="text"
-                      value={col.name}
-                      onChange={(e) => updateSchemaColumn(col.id, 'name', e.target.value)}
-                      className="flex-1 px-2 py-1 text-sm font-medium border rounded dark:bg-gray-800 dark:border-gray-600 mr-2"
-                    />
+                <div key={col.id} className="border dark:border-gray-600 rounded overflow-hidden">
+                  <div
+                    className="p-2 bg-gray-50 dark:bg-gray-700 flex items-center justify-between cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
+                    onClick={() => toggleSchemaExpand(col.id)}
+                  >
+                    <div className="flex items-center gap-2">
+                      {schemaExpanded[col.id] ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                      <span className="text-sm font-medium">{col.name}</span>
+                      <span className="text-xs text-gray-500 dark:text-gray-400">({col.type})</span>
+                    </div>
                     <button
-                      onClick={() => removeSchemaColumn(col.id)}
+                      onClick={(e) => { e.stopPropagation(); removeSchemaColumn(col.id); }}
                       className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1 rounded"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
-                  <div className="space-y-2">
-                    <div>
-                      <label className="text-[10px] text-gray-500 uppercase font-bold">ID</label>
-                      <input
-                        type="text"
-                        value={col.id}
-                        onChange={(e) => updateSchemaColumn(col.id, 'id', e.target.value)}
-                        className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-800 dark:border-gray-600"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[10px] text-gray-500 uppercase font-bold">Type</label>
-                      <select
-                        value={col.type}
-                        onChange={(e) => updateSchemaColumn(col.id, 'type', e.target.value)}
-                        className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-800 dark:border-gray-600"
-                      >
-                        <option value="text">Text</option>
-                        <option value="rating">Rating</option>
-                        <option value="tier">Tier</option>
-                      </select>
-                    </div>
-                    {col.type === 'rating' && (
-                      <div className="grid grid-cols-2 gap-2">
-                        <div>
-                          <label className="text-[10px] text-gray-500 uppercase font-bold">Min</label>
-                          <input
-                            type="number"
-                            value={col.min || 0}
-                            onChange={(e) => updateSchemaColumn(col.id, 'min', parseInt(e.target.value))}
-                            className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-800 dark:border-gray-600"
-                          />
-                        </div>
-                        <div>
-                          <label className="text-[10px] text-gray-500 uppercase font-bold">Max</label>
-                          <input
-                            type="number"
-                            value={col.max || 10}
-                            onChange={(e) => updateSchemaColumn(col.id, 'max', parseInt(e.target.value))}
-                            className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-800 dark:border-gray-600"
-                          />
-                        </div>
+                  
+                  {schemaExpanded[col.id] && (
+                    <div className="p-2 space-y-2 bg-white dark:bg-gray-800">
+                      <div>
+                        <label className="text-[10px] text-gray-500 uppercase font-bold">Name</label>
+                        <input
+                          type="text"
+                          value={col.name}
+                          onChange={(e) => updateSchemaColumn(col.id, 'name', e.target.value)}
+                          className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
+                        />
                       </div>
-                    )}
-                  </div>
+                      <div>
+                        <label className="text-[10px] text-gray-500 uppercase font-bold">Type</label>
+                        <select
+                          value={col.type}
+                          onChange={(e) => updateSchemaColumn(col.id, 'type', e.target.value)}
+                          className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
+                        >
+                          <option value="text">Text</option>
+                          <option value="rating">Rating</option>
+                          <option value="tier">Tier</option>
+                        </select>
+                      </div>
+                      {col.type === 'rating' && (
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[10px] text-gray-500 uppercase font-bold">Min</label>
+                            <input
+                              type="number"
+                              value={col.min || 0}
+                              onChange={(e) => updateSchemaColumn(col.id, 'min', parseInt(e.target.value))}
+                              className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
+                            />
+                          </div>
+                          <div>
+                            <label className="text-[10px] text-gray-500 uppercase font-bold">Max</label>
+                            <input
+                              type="number"
+                              value={col.max || 10}
+                              onChange={(e) => updateSchemaColumn(col.id, 'max', parseInt(e.target.value))}
+                              className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -378,45 +468,43 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
+        <div className="p-3 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+              className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
             >
               {sidebarOpen ? <ChevronDown className="w-5 h-5 rotate-90" /> : <ChevronRight className="w-5 h-5" />}
             </button>
             <div>
-              <h1 className="text-xl font-bold">{data.name}</h1>
+              <h1 className="text-lg font-bold">{data.name}</h1>
               {data.description && <p className="text-xs text-gray-500">{data.description}</p>}
             </div>
           </div>
+          <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 text-sm font-medium"
+          >
+            <Plus className="w-4 h-4" /> Create Item
+          </button>
         </div>
 
         {/* Tier Grid */}
-        <div className="flex-1 overflow-y-auto p-4">
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div className="flex-1 overflow-y-auto p-3">
+          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
             {tierColumn.options.map(tier => (
               <div
                 key={tier}
                 className="flex flex-col bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm"
               >
                 {/* Tier Header */}
-                <div className="p-3 border-b dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-t-lg">
-                  <div className="flex justify-between items-center">
-                    <h3 className="font-bold text-lg">{tier}</h3>
-                    <button
-                      onClick={() => addItem(tier)}
-                      className="text-xs px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                    >
-                      +
-                    </button>
-                  </div>
+                <div className="px-3 py-2 border-b dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-t-lg">
+                  <h3 className="font-bold text-lg text-center">{tier}</h3>
                 </div>
 
                 {/* Items Container */}
                 <div
-                  className={`flex-1 p-2 min-h-[200px] space-y-2 transition-colors ${
+                  className={`flex-1 p-1.5 min-h-[150px] space-y-1.5 transition-colors ${
                     dragOverTier === tier ? 'bg-blue-50 dark:bg-blue-900/20' : ''
                   }`}
                   onDragOver={(e) => {
@@ -444,10 +532,7 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                     <div
                       key={item.id}
                       draggable
-                      onDragStart={(e) => {
-                        setDraggingId(item.id);
-                        e.dataTransfer.effectAllowed = 'move';
-                      }}
+                      onDragStart={() => setDraggingId(item.id)}
                       onDragEnd={() => {
                         setDraggingId(null);
                         setDragOverItem(null);
@@ -458,22 +543,12 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                         e.stopPropagation();
                         if (draggingId === item.id) return;
 
-                        const dragIndex = groupedItems[tier].findIndex(i => i.id === draggingId);
-                        const hoverIndex = groupedItems[tier].findIndex(i => i.id === item.id);
-
-                        if (dragIndex !== -1 && hoverIndex !== -1) {
-                          setDragOverItem({
-                            id: item.id,
-                            position: dragIndex < hoverIndex ? 'after' : 'before'
-                          });
-                        } else {
-                          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-                          const midpoint = rect.top + rect.height / 2;
-                          setDragOverItem({
-                            id: item.id,
-                            position: e.clientY < midpoint ? 'before' : 'after'
-                          });
-                        }
+                        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+                        const midpoint = rect.top + rect.height / 2;
+                        setDragOverItem({
+                          id: item.id,
+                          position: e.clientY < midpoint ? 'before' : 'after'
+                        });
                       }}
                       onDrop={(e) => {
                         e.preventDefault();
@@ -485,7 +560,7 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                         setDragOverItem(null);
                         setDragOverTier(null);
                       }}
-                      className={`relative p-2 rounded bg-white dark:bg-gray-900 border cursor-move group transition-all ${
+                      className={`relative p-1.5 rounded bg-white dark:bg-gray-900 border cursor-move group transition-all ${
                         draggingId === item.id ? 'opacity-40' : ''
                       } ${
                         dragOverItem?.id === item.id
@@ -502,8 +577,8 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                       )}
 
                       {/* Header */}
-                      <div className="flex justify-between items-start mb-2">
-                        <GripVertical className="w-3 h-3 text-gray-400 cursor-grab active:cursor-grabbing" />
+                      <div className="flex justify-between items-center mb-1">
+                        <GripVertical className="w-3 h-3 text-gray-400 cursor-grab active:cursor-grabbing flex-shrink-0" />
                         <button
                           onClick={() => deleteItem(item.id)}
                           className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
@@ -513,39 +588,20 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                       </div>
 
                       {/* Item Name */}
-                      <input
-                        value={item.name}
-                        onChange={(e) => updateItemName(item.id, e.target.value)}
-                        className="w-full text-sm font-semibold mb-2 px-1.5 py-1 bg-gray-50 dark:bg-gray-800 border border-transparent hover:border-gray-300 dark:hover:border-gray-600 rounded focus:outline-none focus:border-blue-500"
-                        placeholder="Item name"
-                      />
+                      <div className="font-semibold text-sm mb-1 px-1 truncate" title={item.name}>
+                        {item.name}
+                      </div>
 
-                      {/* Dynamic Fields */}
-                      <div className="space-y-1.5">
+                      {/* Compact stats */}
+                      <div className="text-[10px] text-gray-600 dark:text-gray-400 space-y-0.5">
                         {data.schema.map(col => {
                           if (col.type === 'tier') return null;
+                          const value = item.values[col.id];
+                          if (col.type === 'text' && !value) return null;
                           return (
-                            <div key={col.id}>
-                              <label className="text-[9px] uppercase font-bold text-gray-400 block mb-0.5">
-                                {col.name}
-                              </label>
-                              {col.type === 'rating' ? (
-                                <input
-                                  type="number"
-                                  max={col.max || 10}
-                                  min={col.min || 0}
-                                  value={item.values[col.id] || 0}
-                                  onChange={(e) => updateItemValue(item.id, col.id, Number(e.target.value))}
-                                  className="w-full text-xs px-1.5 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:border-blue-500"
-                                />
-                              ) : (
-                                <input
-                                  type="text"
-                                  value={item.values[col.id] || ''}
-                                  onChange={(e) => updateItemValue(item.id, col.id, e.target.value)}
-                                  className="w-full text-xs px-1.5 py-1 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded focus:outline-none focus:border-blue-500"
-                                />
-                              )}
+                            <div key={col.id} className="flex justify-between gap-1">
+                              <span className="font-medium truncate">{col.name}:</span>
+                              <span className="text-gray-900 dark:text-gray-100">{value}</span>
                             </div>
                           );
                         })}

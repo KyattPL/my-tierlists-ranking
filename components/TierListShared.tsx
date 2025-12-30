@@ -12,7 +12,7 @@ interface SchemaColumn {
   min?: number;
 }
 
-interface TierListItem {
+export interface TierListItem {
   id:string;
   name: string;
   imageUrl?: string | null;
