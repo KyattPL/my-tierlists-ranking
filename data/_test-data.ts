@@ -1,4 +1,4 @@
-import { AppNode } from "@/app/page";
+import { AppNode } from "@/lib/types";
 
 const mockData: AppNode[] = [
     {

@@ -1,7 +1,7 @@
 "use client"
 
-import React, { useEffect, useState } from 'react';
-import { Plus, ArrowLeft, Code, Eye, Settings, Database, LayoutGrid, Moon, Sun } from 'lucide-react';
+import React, { useEffect, useState, useTransition } from 'react';
+import { ArrowLeft, Code, Eye, Settings, Database, LayoutGrid, Moon, Sun, Save, Loader2, ListPlus } from 'lucide-react';
 import Link from 'next/link';
 import CodeTab from './tabs/CodeTab';
 import PreviewTab from './tabs/PreviewTab';
@@ -10,11 +10,13 @@ import ItemsTab from './tabs/ItemsTab';
 import SchemaTab from './tabs/SchemaTab';
 import GeneralTab from './tabs/GeneralTab';
 import { useTierlistMaker } from './state/useTierlistMaker';
+import { saveTierlistAction } from '@/app/actions';
 
 export default function TierlistMaker() {
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const { data, setData, createdCategories, setCreatedCategories } = useTierlistMaker();
     const [activeTab, setActiveTab] = useState<'general' | 'schema' | 'items' | 'preview' | 'code' | 'gui'>('general');
+    const [isPending, startTransition] = useTransition();
 
     useEffect(() => {
         const storedTheme = localStorage.getItem('theme');
@@ -37,61 +39,109 @@ export default function TierlistMaker() {
         }
     }, [theme]);
 
+    const handleSave = () => {
+        if (!data.id || !data.name) {
+            alert("Please provide an ID and Name in the General tab.");
+            return;
+        }
+        startTransition(async () => {
+            const result = await saveTierlistAction(data, createdCategories);
+            if (result.success) {
+                alert(result.message);
+            } else {
+                alert("Error: " + result.message);
+            }
+        });
+    };
+
+    const navItems = [
+        { id: 'general', label: 'General Info', icon: Settings },
+        { id: 'schema', label: 'Schema', icon: Database },
+        { id: 'items', label: 'Items', icon: ListPlus },
+        { id: 'gui', label: 'GUI Maker', icon: LayoutGrid },
+        { id: 'preview', label: 'Preview', icon: Eye },
+        { id: 'code', label: 'Get Code', icon: Code },
+    ] as const;
+
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 flex flex-col">
-            <div className="bg-white dark:bg-gray-800 border-b dark:border-gray-700 p-4 flex items-center justify-between sticky top-0 z-10">
+        <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans">
+            {/* Top Bar */}
+            <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
                 <div className="flex items-center gap-4">
-                <Link href="/" className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full">
-                    <ArrowLeft className="w-5 h-5" />
-                </Link>
-                <h1 className="text-xl font-bold">Tierlist Maker</h1>
+                    <Link href="/" className="p-2 -ml-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                        <ArrowLeft className="w-5 h-5" />
+                    </Link>
+                    <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
+                    <h1 className="text-lg font-bold tracking-tight">Tierlist Maker</h1>
+                    <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-xs font-medium">
+                        Beta
+                    </span>
                 </div>
-                <div className="flex gap-2">
-                <button onClick={() => setActiveTab('preview')} className={`px-3 py-2 rounded flex items-center gap-2 ${activeTab === 'preview' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    <Eye className="w-4 h-4" /> <span className="hidden sm:inline">Preview</span>
-                </button>
-                <button onClick={() => setActiveTab('code')} className={`px-3 py-2 rounded flex items-center gap-2 ${activeTab === 'code' ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    <Code className="w-4 h-4" /> <span className="hidden sm:inline">Get Code</span>
-                </button>
-                <button
-                    onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                    className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
-                    aria-label="Toggle theme"
-                >
-                    {theme === 'light'
-                        ? <Moon className="w-5 h-5 text-gray-700" />
-                        : <Sun className="w-5 h-5 text-yellow-400" />
-                    }
-                </button>
+                
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500 dark:text-zinc-400"
+                        aria-label="Toggle theme"
+                    >
+                        {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
+                    </button>
+                    
+                    <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
+                    
+                    <button 
+                        onClick={handleSave} 
+                        disabled={isPending}
+                        className="px-4 py-2 rounded-lg flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-sm shadow-sm hover:shadow-md hover:shadow-indigo-500/20 active:scale-95"
+                    >
+                        {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 
+                        <span>Save Tierlist</span>
+                    </button>
                 </div>
-            </div>
+            </header>
 
             <div className="flex flex-1 overflow-hidden">
-                <div className="w-16 sm:w-64 bg-white dark:bg-gray-800 border-r dark:border-gray-700 flex flex-col">
-                <nav className="p-2 space-y-1">
-                    <button onClick={() => setActiveTab('general')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${activeTab === 'general' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    <Settings className="w-5 h-5" /> <span className="hidden sm:inline font-medium">General Info</span>
-                    </button>
-                    <button onClick={() => setActiveTab('schema')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${activeTab === 'schema' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    <Database className="w-5 h-5" /> <span className="hidden sm:inline font-medium">Schema</span>
-                    </button>
-                    <button onClick={() => setActiveTab('items')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${activeTab === 'items' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    <Plus className="w-5 h-5" /> <span className="hidden sm:inline font-medium">Items</span>
-                    </button>
-                    <button onClick={() => setActiveTab('gui')} className={`w-full flex items-center gap-3 px-3 py-3 rounded-md transition-colors ${activeTab === 'gui' ? 'bg-blue-500 text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'}`}>
-                    <LayoutGrid className="w-5 h-5" /> <span className="hidden sm:inline font-medium">GUI Maker</span>
-                    </button>
-                </nav>
-                </div>
-                {/* Main Content */}
-                <div className="flex-1 overflow-y-auto p-4 sm:p-8">
-                {activeTab === 'general' && <GeneralTab data={data} createdCategories={createdCategories} setData={setData} setCreatedCategories={setCreatedCategories} />}
-                {activeTab === 'schema' && <SchemaTab data={data} setData={setData} />}
-                {activeTab === 'items' && <ItemsTab data={data} setData={setData} />}
-                {activeTab === 'gui' && <GuiTab data={data} setData={setData} createdCategories={createdCategories} setCreatedCategories={setCreatedCategories} />}
-                {activeTab === 'preview' && <PreviewTab data={data} />}
-                {activeTab === 'code' && <CodeTab data={data} createdCategories={createdCategories} />}
-                </div>
+                {/* Sidebar Navigation */}
+                <aside className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
+                    <div className="p-4 space-y-1">
+                        {navItems.map((item) => {
+                            const Icon = item.icon;
+                            const isActive = activeTab === item.id;
+                            return (
+                                <button
+                                    key={item.id}
+                                    onClick={() => setActiveTab(item.id)}
+                                    className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                                        isActive 
+                                            ? 'bg-indigo-50 text-indigo-600 dark:bg-indigo-900/20 dark:text-indigo-400' 
+                                            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-200'
+                                    }`}
+                                >
+                                    <Icon className={`w-4 h-4 ${isActive ? 'text-indigo-600 dark:text-indigo-400' : 'text-zinc-400 dark:text-zinc-500'}`} />
+                                    {item.label}
+                                </button>
+                            );
+                        })}
+                    </div>
+                    
+                    <div className="mt-auto p-4 border-t border-zinc-200 dark:border-zinc-800">
+                        <div className="text-xs text-zinc-400 text-center">
+                            Changes are local until saved.
+                        </div>
+                    </div>
+                </aside>
+
+                {/* Main Content Area */}
+                <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-6 sm:p-8 lg:p-10">
+                    <div className="max-w-5xl mx-auto">
+                        {activeTab === 'general' && <GeneralTab data={data} createdCategories={createdCategories} setData={setData} setCreatedCategories={setCreatedCategories} />}
+                        {activeTab === 'schema' && <SchemaTab data={data} setData={setData} />}
+                        {activeTab === 'items' && <ItemsTab data={data} setData={setData} />}
+                        {activeTab === 'gui' && <GuiTab data={data} setData={setData} createdCategories={createdCategories} setCreatedCategories={setCreatedCategories} />}
+                        {activeTab === 'preview' && <PreviewTab data={data} />}
+                        {activeTab === 'code' && <CodeTab data={data} createdCategories={createdCategories} />}
+                    </div>
+                </main>
             </div>
         </div>
     );

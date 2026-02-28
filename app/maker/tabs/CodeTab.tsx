@@ -1,7 +1,7 @@
 import React from 'react';
 
 import { Copy } from 'lucide-react';
-import { Category, TierList } from '@/components/TierListShared';
+import { Category, TierList } from '@/lib/types';
 const toVarName = (id: string) => id.replace(/-([a-z])/g, (g) => g[1].toUpperCase()).replace(/[^a-zA-Z0-9]/g, '');
 
 interface Props {
@@ -11,7 +11,7 @@ interface Props {
 
 const CodeTab = ({ data, createdCategories }: Props) => {
     const generateCode = () => {
-        let output = `import { Category, TierList } from "@/app/page";\n\n`;
+        let output = `import { Category, TierList } from "@/lib/types";\n\n`;
         const exportNames: string[] = [];
 
         createdCategories.forEach(cat => {

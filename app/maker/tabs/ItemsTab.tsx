@@ -1,5 +1,5 @@
-import { TierList } from '@/components/TierListShared';
-import { ArrowDown, ArrowUp, Plus, Trash2 } from 'lucide-react';
+import { TierList } from '@/lib/types';
+import { ArrowDown, ArrowUp, Plus, Trash2, Image as ImageIcon, GripVertical } from 'lucide-react';
 import React from 'react';
 
 interface Props {
@@ -51,97 +51,136 @@ const ItemsTab = ({ data, setData }: Props) => {
     };
 
     return (
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">Items ({data.items.length})</h2>
-            <button onClick={addItem} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 flex items-center gap-2">
-                <Plus className="w-4 h-4" /> Add Item
-            </button>
+                <div>
+                    <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">Items</h2>
+                    <p className="text-zinc-500 dark:text-zinc-400 mt-1">Manage the items you want to rank.</p>
+                </div>
+                <button 
+                    onClick={addItem} 
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2 shadow-sm font-medium transition-all active:scale-95"
+                >
+                    <Plus className="w-4 h-4" /> Add Item
+                </button>
             </div>
 
-            <div className="grid grid-cols-1 gap-4">
-            {data.items.map((item, index) => (
-                <div key={item.id} className="bg-white dark:bg-gray-800 p-4 rounded border dark:border-gray-700 relative group">
-                <div className="absolute left-0 top-0 bottom-0 w-8 flex flex-col justify-center items-center gap-1 bg-gray-50 dark:bg-gray-900/30 rounded-l border-r dark:border-gray-700">
-                    <button 
-                        onClick={() => moveItem(index, 'up')} 
-                        disabled={index === 0}
-                        className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30"
-                    >
-                        <ArrowUp className="w-4 h-4" />
-                    </button>
-                    <span className="text-[10px] font-mono text-gray-400">{index + 1}</span>
-                    <button 
-                        onClick={() => moveItem(index, 'down')} 
-                        disabled={index === data.items.length - 1}
-                        className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded disabled:opacity-30"
-                    >
-                        <ArrowDown className="w-4 h-4" />
-                    </button>
-                </div>
-                <div className="pl-6">
-                    <div className="flex justify-between mb-4">
-                    <div className="flex-1 mr-4">
-                        <label className="text-xs text-gray-500">Item Name</label>
-                        <input 
-                        type="text" 
-                        value={item.name} 
-                        onChange={(e) => updateItem(item.id, 'name', e.target.value)} 
-                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 font-bold" 
-                        />
+            <div className="space-y-3">
+                {data.items.length === 0 && (
+                    <div className="text-center py-12 border-2 border-dashed border-zinc-200 dark:border-zinc-800 rounded-xl bg-zinc-50 dark:bg-zinc-900/50">
+                        <div className="w-12 h-12 bg-zinc-100 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <Plus className="w-6 h-6 text-zinc-400" />
+                        </div>
+                        <h3 className="text-zinc-900 dark:text-zinc-100 font-medium">No items yet</h3>
+                        <p className="text-zinc-500 dark:text-zinc-400 text-sm mt-1">Click the &quot;Add Item&quot; button to get started.</p>
                     </div>
-                    <div className="flex-1 mr-4">
-                        <label className="text-xs text-gray-500">Image Path</label>
-                        <input 
-                        type="text" 
-                        value={item.imageUrl || ''} 
-                        onChange={(e) => updateItem(item.id, 'imageUrl', e.target.value)} 
-                        className="w-full p-2 border rounded dark:bg-gray-700 dark:border-gray-600 text-sm" 
-                        placeholder="/images/..."
-                        />
-                    </div>
-                    <button onClick={() => removeItem(item.id)} className="text-red-500 hover:bg-red-50 p-2 rounded h-10 mt-5">
-                        <Trash2 className="w-5 h-5" />
-                    </button>
-                    </div>
-                </div>
+                )}
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 bg-gray-50 dark:bg-gray-900/50 p-3 rounded">
-                    {data.schema.map(col => (
-                    <div key={col.id}>
-                        <label className="text-xs text-gray-500 block mb-1">{col.name}</label>
-                        {col.type === 'tier' ? (
-                        <select 
-                            value={item.values[col.id] || 'B'} 
-                            onChange={(e) => updateItem(item.id, 'values', e.target.value, col.id)}
-                            className="w-full p-1 border rounded dark:bg-gray-700 dark:border-gray-600"
+                {data.items.map((item, index) => (
+                    <div key={item.id} className="bg-white dark:bg-zinc-900 p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm flex gap-4 items-start group transition-all hover:border-indigo-300 dark:hover:border-indigo-800">
+                        {/* Drag/Order Controls */}
+                        <div className="flex flex-col gap-1 pt-1">
+                            <button 
+                                onClick={() => moveItem(index, 'up')} 
+                                disabled={index === 0}
+                                className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors"
+                            >
+                                <ArrowUp className="w-4 h-4" />
+                            </button>
+                            <div className="w-6 h-6 flex items-center justify-center text-xs font-mono text-zinc-400 font-medium bg-zinc-50 dark:bg-zinc-800 rounded">
+                                {index + 1}
+                            </div>
+                            <button 
+                                onClick={() => moveItem(index, 'down')} 
+                                disabled={index === data.items.length - 1}
+                                className="p-1 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 disabled:opacity-30 transition-colors"
+                            >
+                                <ArrowDown className="w-4 h-4" />
+                            </button>
+                        </div>
+
+                        {/* Main Content */}
+                        <div className="flex-1 space-y-4">
+                            <div className="flex flex-col md:flex-row gap-4">
+                                <div className="flex-1 space-y-1.5">
+                                    <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Name</label>
+                                    <input 
+                                        type="text" 
+                                        value={item.name} 
+                                        onChange={(e) => updateItem(item.id, 'name', e.target.value)} 
+                                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 font-medium text-zinc-900 dark:text-zinc-100" 
+                                        placeholder="Item Name"
+                                    />
+                                </div>
+                                <div className="flex-1 space-y-1.5">
+                                    <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider flex items-center gap-1">
+                                        <ImageIcon className="w-3 h-3" /> Image URL
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        value={item.imageUrl || ''} 
+                                        onChange={(e) => updateItem(item.id, 'imageUrl', e.target.value)} 
+                                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 text-sm text-zinc-600 dark:text-zinc-300" 
+                                        placeholder="/images/..."
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Dynamic Fields Grid */}
+                            {data.schema.length > 0 && (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pt-2 border-t border-zinc-100 dark:border-zinc-800">
+                                    {data.schema.map(col => (
+                                        <div key={col.id} className="space-y-1">
+                                            <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase truncate block" title={col.name}>{col.name}</label>
+                                            {col.type === 'tier' ? (
+                                                <div className="relative">
+                                                    <select 
+                                                        value={item.values[col.id] || 'B'} 
+                                                        onChange={(e) => updateItem(item.id, 'values', e.target.value, col.id)}
+                                                        className="w-full pl-2 pr-6 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded text-sm focus:border-indigo-500 focus:ring-0 appearance-none font-medium"
+                                                    >
+                                                        {(col.options || ['S','A','B','C','D','F']).map(opt => (
+                                                            <option key={opt} value={opt}>{opt}</option>
+                                                        ))}
+                                                    </select>
+                                                    <ArrowDown className="w-3 h-3 absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                                                </div>
+                                            ) : col.type === 'rating' ? (
+                                                <div className="relative">
+                                                    <input 
+                                                        type="number" 
+                                                        max={col.max || 10}
+                                                        min={0}
+                                                        value={item.values[col.id] || 0} 
+                                                        onChange={(e) => updateItem(item.id, 'values', parseFloat(e.target.value), col.id)}
+                                                        className="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded text-sm focus:border-indigo-500 focus:ring-0"
+                                                    />
+                                                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-zinc-400">/{col.max || 10}</span>
+                                                </div>
+                                            ) : (
+                                                <input 
+                                                    type="text" 
+                                                    value={item.values[col.id] || ''} 
+                                                    onChange={(e) => updateItem(item.id, 'values', e.target.value, col.id)}
+                                                    className="w-full px-2 py-1.5 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded text-sm focus:border-indigo-500 focus:ring-0"
+                                                />
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Actions */}
+                        <button 
+                            onClick={() => removeItem(item.id)} 
+                            className="p-2 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors self-start"
+                            title="Remove Item"
                         >
-                            {(col.options || ['S','A','B','C','D','F']).map(opt => (
-                            <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                        </select>
-                        ) : col.type === 'rating' ? (
-                        <input 
-                            type="number" 
-                            max={col.max || 10}
-                            min={0}
-                            value={item.values[col.id] || 0} 
-                            onChange={(e) => updateItem(item.id, 'values', parseFloat(e.target.value), col.id)}
-                            className="w-full p-1 border rounded dark:bg-gray-700 dark:border-gray-600"
-                        />
-                        ) : (
-                        <input 
-                            type="text" 
-                            value={item.values[col.id] || ''} 
-                            onChange={(e) => updateItem(item.id, 'values', e.target.value, col.id)}
-                            className="w-full p-1 border rounded dark:bg-gray-700 dark:border-gray-600"
-                        />
-                        )}
+                            <Trash2 className="w-4 h-4" />
+                        </button>
                     </div>
-                    ))}
-                </div>
-                </div>
-            ))}
+                ))}
             </div>
         </div>
     );

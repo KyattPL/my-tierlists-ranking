@@ -1,4 +1,5 @@
-import { TierList, TierlistView } from '@/components/TierListShared'
+import { TierList } from '@/lib/types';
+import { TierlistView } from '@/components/TierListShared';
 import React from 'react'
 
 interface Props {

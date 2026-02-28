@@ -1,4 +1,4 @@
-import { AppNode } from "@/app/page";
+import { AppNode } from "@/lib/types";
 import { soulsData } from "./souls-games";
 import { kornKornData } from "./Music/Korn/kornKornData";
 

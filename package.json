@@ -6,7 +6,7 @@
     "dev": "next dev --turbopack",
     "build": "node scripts/sync-data.js && next build --turbopack",
     "start": "next start",
-    "lint": "eslint"
+    "fetch-posters": "node scripts/fetch-posters.js"
   },
   "dependencies": {
     "csv-parser": "^3.2.0",

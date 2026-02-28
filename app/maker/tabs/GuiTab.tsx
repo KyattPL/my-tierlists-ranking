@@ -1,7 +1,8 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { GripVertical, X, Plus, Trash2, ChevronDown, ChevronRight, FolderPlus } from 'lucide-react';
-import { TierList, Category, TierListItem } from '@/components/TierListShared';
+import { GripVertical, X, Plus, Trash2, ChevronDown, ChevronRight, FolderPlus, List, Columns } from 'lucide-react';
+import { TierList, Category, TierListItem } from '@/lib/types';
 import { tierlistData } from '@/data/tierlists-combined';
+import { TIER_COLORS } from '@/components/TierListShared';
 
 interface Props {
   data: TierList;
@@ -10,38 +11,14 @@ interface Props {
   setCreatedCategories: React.Dispatch<React.SetStateAction<Category[]>>;
 }
 
-const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories }: Props) => {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [sidebarSection, setSidebarSection] = useState<'general' | 'schema'>('general');
+const GuiTab = ({ data, setData, createdCategories, setCreatedCategories }: Props) => {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverTier, setDragOverTier] = useState<string | null>(null);
   const [dragOverItem, setDragOverItem] = useState<{ id: string; position: 'before' | 'after' } | null>(null);
-  const [schemaExpanded, setSchemaExpanded] = useState<Record<string, boolean>>({});
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [showCategoryCreator, setShowCategoryCreator] = useState(false);
-  const [newCatForm, setNewCatForm] = useState({ name: '', id: '', parentId: '' });
   const [createForm, setCreateForm] = useState<{ tier: string; name: string; [key: string]: string | number }>({ tier: 'S', name: '' });
 
   const tierColumn = useMemo(() => data.schema.find(c => c.type === 'tier'), [data.schema]);
-
-  const allCategories = useMemo(() => {
-    const existingCats = tierlistData.filter((n): n is Category => n.type === 'category');
-    return [...existingCats, ...createdCategories];
-  }, [createdCategories]);
-
-  const getHierarchicalOptions = useCallback((parentId: string | null = null, level = 0): { node: Category, level: number }[] => {
-    const children = allCategories.filter(c => c.parentId === parentId);
-    let result: { node: Category, level: number }[] = [];
-    
-    children.forEach(child => {
-      result.push({ node: child, level });
-      result = [...result, ...getHierarchicalOptions(child.id, level + 1)];
-    });
-
-    return result;
-  }, [allCategories]);
-
-  const categoryOptions = useMemo(() => getHierarchicalOptions(null, 0), [getHierarchicalOptions]);
 
   const groupedItems = useMemo(() => {
     if (!tierColumn?.options) return {};
@@ -124,110 +101,79 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
     setData(prev => ({ ...prev, items: prev.items.filter(i => i.id !== id) }));
   };
 
-//   const updateItemValue = (itemId: string, key: string, value: string | number) => {
-//     setData(prev => ({
-//       ...prev,
-//       items: prev.items.map(i => i.id === itemId ? { ...i, values: { ...i.values, [key]: value } } : i)
-//     }));
-//   };
-
-//   const updateItemName = (itemId: string, name: string) => {
-//     setData(prev => ({
-//       ...prev,
-//       items: prev.items.map(i => i.id === itemId ? { ...i, name } : i)
-//     }));
-//   };
-
-  const addSchemaColumn = () => {
-    const newId = `col_${Date.now()}`;
-    setData(prev => ({ ...prev, schema: [...prev.schema, { id: newId, name: 'New Field', type: 'text' }] }));
-  };
-
-  const removeSchemaColumn = (id: string) => {
-    setData(prev => ({ ...prev, schema: prev.schema.filter(c => c.id !== id) }));
-  };
-
-  const updateSchemaColumn = (id: string, field: string, value: string | number) => {
-    setData(prev => ({ ...prev, schema: prev.schema.map(c => c.id === id ? { ...c, [field]: value } : c) }));
-  };
-
-  const toggleSchemaExpand = (id: string) => {
-    setSchemaExpanded(prev => ({ ...prev, [id]: !prev[id] }));
-  };
-
-  const handleCreateCategory = () => {
-    if (!newCatForm.name || !newCatForm.id) {
-      alert("Name and ID are required");
-      return;
-    }
-    
-    const newCategory: Category = {
-      id: newCatForm.id,
-      name: newCatForm.name,
-      description: `Container for ${newCatForm.name}`,
-      parentId: newCatForm.parentId || null,
-      children: [],
-      type: 'category'
-    };
-
-    setCreatedCategories([...createdCategories, newCategory]);
-    setNewCatForm({ name: '', id: '', parentId: '' });
-    setShowCategoryCreator(false);
-  };
-
   if (!tierColumn?.options) {
     return (
-      <div className="p-8 max-w-2xl mx-auto bg-red-50 dark:bg-red-900/20 border border-red-300 rounded">
-        <h2 className="font-bold text-red-700 dark:text-red-300">GUI Maker unavailable</h2>
-        <p className="text-sm mt-2">A Tier column is required to use GUI Maker.</p>
+      <div className="p-12 max-w-2xl mx-auto text-center bg-zinc-50 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/20 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Columns className="w-8 h-8" />
+        </div>
+        <h2 className="font-bold text-xl text-zinc-900 dark:text-zinc-100 mb-2">GUI Maker Unavailable</h2>
+        <p className="text-zinc-500 dark:text-zinc-400">A <strong>Tier</strong> column is required in the Schema tab to use the GUI Maker.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="h-full flex flex-col">
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">GUI Maker</h2>
+            <p className="text-zinc-500 dark:text-zinc-400 mt-1">Drag and drop items to organize your tierlist.</p>
+        </div>
+        <button
+            onClick={() => setShowCreateModal(true)}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 flex items-center gap-2 text-sm font-medium shadow-sm transition-all active:scale-95"
+        >
+            <Plus className="w-4 h-4" /> Quick Add Item
+        </button>
+      </div>
+
       {/* Create Modal */}
       {showCreateModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
-            <div className="p-4 border-b dark:border-gray-700 flex justify-between items-center sticky top-0 bg-white dark:bg-gray-800">
-              <h2 className="text-lg font-bold">Create New Item</h2>
-              <button onClick={() => setShowCreateModal(false)} className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white dark:bg-zinc-900 rounded-xl shadow-xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col animate-fade-in border border-zinc-200 dark:border-zinc-700">
+            <div className="p-4 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center">
+              <h2 className="text-lg font-bold">Add New Item</h2>
+              <button onClick={() => setShowCreateModal(false)} className="p-1 text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors">
                 <X className="w-5 h-5" />
               </button>
             </div>
             
-            <div className="p-4 space-y-4">
+            <div className="p-5 space-y-4 overflow-y-auto">
               <div>
-                <label className="block text-sm font-medium mb-1">Item Name *</label>
+                <label className="block text-xs font-bold text-zinc-500 uppercase mb-1.5">Item Name</label>
                 <input
                   type="text"
                   value={createForm.name}
                   onChange={(e) => setCreateForm({ ...createForm, name: e.target.value })}
-                  className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all font-medium"
                   placeholder="Enter item name..."
                   autoFocus
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-1">Tier *</label>
-                <select
-                  value={createForm.tier}
-                  onChange={(e) => setCreateForm({ ...createForm, tier: e.target.value })}
-                  className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                >
-                  {tierColumn.options.map(tier => (
-                    <option key={tier} value={tier}>{tier}</option>
-                  ))}
-                </select>
+                <label className="block text-xs font-bold text-zinc-500 uppercase mb-1.5">Tier</label>
+                <div className="relative">
+                    <select
+                    value={createForm.tier}
+                    onChange={(e) => setCreateForm({ ...createForm, tier: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 appearance-none font-medium"
+                    >
+                    {tierColumn.options.map(tier => (
+                        <option key={tier} value={tier}>{tier}</option>
+                    ))}
+                    </select>
+                    <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
+                </div>
               </div>
 
               {data.schema.map(col => {
                 if (col.type === 'tier') return null;
                 return (
                   <div key={col.id}>
-                    <label className="block text-sm font-medium mb-1">{col.name}</label>
+                    <label className="block text-xs font-bold text-zinc-500 uppercase mb-1.5">{col.name}</label>
                     {col.type === 'rating' ? (
                       <input
                         type="number"
@@ -235,13 +181,13 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                         max={col.max || 10}
                         value={createForm[col.id] ?? col.min ?? 0}
                         onChange={(e) => setCreateForm({ ...createForm, [col.id]: Number(e.target.value) })}
-                        className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
                       />
                     ) : (
                       <textarea
                         value={createForm[col.id] ?? ''}
                         onChange={(e) => setCreateForm({ ...createForm, [col.id]: e.target.value })}
-                        className="w-full px-3 py-2 border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2 bg-zinc-50 dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 resize-y min-h-[80px]"
                         rows={2}
                       />
                     )}
@@ -250,16 +196,16 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
               })}
             </div>
 
-            <div className="p-4 border-t dark:border-gray-700 flex gap-2 justify-end sticky bottom-0 bg-white dark:bg-gray-800">
+            <div className="p-4 border-t border-zinc-100 dark:border-zinc-800 flex gap-3 justify-end bg-zinc-50 dark:bg-zinc-900/50">
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="px-4 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+                className="px-4 py-2 text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-200 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-lg transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={addItemViaModal}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 text-sm font-medium shadow-sm active:scale-95 transition-all"
               >
                 Create Item
               </button>
@@ -268,244 +214,37 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
         </div>
       )}
 
-      {/* Sidebar */}
-      <div className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-300 border-r dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden flex flex-col`}>
-        <div className="p-3 border-b dark:border-gray-700">
-          <div className="flex gap-2">
-            <button
-              onClick={() => setSidebarSection('general')}
-              className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                sidebarSection === 'general'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              General
-            </button>
-            <button
-              onClick={() => setSidebarSection('schema')}
-              className={`flex-1 px-3 py-1.5 rounded text-sm font-medium transition-colors ${
-                sidebarSection === 'schema'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              Schema
-            </button>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-3">
-          {sidebarSection === 'general' ? (
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Name</label>
-                <input
-                  type="text"
-                  value={data.name}
-                  onChange={(e) => setData(prev => ({ ...prev, name: e.target.value }))}
-                  className="w-full px-2 py-1.5 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:border-blue-500"
-                />
-              </div>
-              <div>
-                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Description</label>
-                <textarea
-                  value={data.description}
-                  onChange={(e) => setData(prev => ({ ...prev, description: e.target.value }))}
-                  className="w-full px-2 py-1.5 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:border-blue-500"
-                  rows={2}
-                />
-              </div>
-              <div className="border-t dark:border-gray-700 pt-4">
-                <div className="flex justify-between items-center mb-2">
-                  <label className="block text-xs font-bold text-gray-500 uppercase">Parent Category</label>
-                  <button 
-                    onClick={() => setShowCategoryCreator(!showCategoryCreator)}
-                    className="text-xs text-blue-500 hover:underline flex items-center gap-1"
-                  >
-                    {showCategoryCreator ? 'Cancel' : <><FolderPlus className="w-3 h-3"/> New</>}
-                  </button>
-                </div>
-
-                {showCategoryCreator && (
-                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg border border-blue-200 dark:border-blue-800 mb-3">
-                    <h3 className="font-bold text-xs mb-2 text-blue-800 dark:text-blue-200">Create New Category</h3>
-                    <div className="space-y-2 mb-2">
-                      <input 
-                        type="text" 
-                        placeholder="Category Name"
-                        value={newCatForm.name}
-                        onChange={e => setNewCatForm({...newCatForm, name: e.target.value, id: e.target.value.toLowerCase().replace(/\s+/g, '-')})}
-                        className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <input 
-                        type="text"
-                        placeholder="category-id"
-                        value={newCatForm.id}
-                        onChange={e => setNewCatForm({...newCatForm, id: e.target.value})}
-                        className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
-                      />
-                      <select 
-                        value={newCatForm.parentId}
-                        onChange={e => setNewCatForm({...newCatForm, parentId: e.target.value})}
-                        className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
-                      >
-                        <option value="">(Root Level)</option>
-                        {categoryOptions.map(({ node, level }) => (
-                          <option key={node.id} value={node.id}>
-                            {'\u00A0'.repeat(level * 4)} {level > 0 ? '└ ' : ''} {node.name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                    <button 
-                      onClick={handleCreateCategory} 
-                      className="bg-blue-600 text-white px-2 py-1 rounded text-xs hover:bg-blue-700 w-full"
-                    >
-                      Create
-                    </button>
-                  </div>
-                )}
-
-                <select
-                  value={data.parentId || ''}
-                  onChange={(e) => setData(prev => ({ ...prev, parentId: e.target.value || null }))}
-                  className="w-full px-2 py-1.5 text-sm border rounded dark:bg-gray-700 dark:border-gray-600 focus:outline-none focus:border-blue-500 font-mono"
-                >
-                  <option value="">None (Root Level)</option>
-                  {categoryOptions.map(({ node, level }) => (
-                    <option key={node.id} value={node.id}>
-                      {'\u00A0'.repeat(level * 4)} {level > 0 ? '└ ' : ''} {node.name} {createdCategories.find(c => c.id === node.id) ? '(New)' : ''}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              <div className="flex justify-between items-center mb-2">
-                <h3 className="text-sm font-bold">Fields</h3>
-                <button
-                  onClick={addSchemaColumn}
-                  className="text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-1"
-                >
-                  <Plus className="w-3 h-3" /> Add
-                </button>
-              </div>
-              {data.schema.map(col => (
-                <div key={col.id} className="border dark:border-gray-600 rounded overflow-hidden">
-                  <div
-                    className="p-2 bg-gray-50 dark:bg-gray-700 flex items-center justify-between cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-600"
-                    onClick={() => toggleSchemaExpand(col.id)}
-                  >
-                    <div className="flex items-center gap-2">
-                      {schemaExpanded[col.id] ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                      <span className="text-sm font-medium">{col.name}</span>
-                      <span className="text-xs text-gray-500 dark:text-gray-400">({col.type})</span>
-                    </div>
-                    <button
-                      onClick={(e) => { e.stopPropagation(); removeSchemaColumn(col.id); }}
-                      className="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 p-1 rounded"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                  
-                  {schemaExpanded[col.id] && (
-                    <div className="p-2 space-y-2 bg-white dark:bg-gray-800">
-                      <div>
-                        <label className="text-[10px] text-gray-500 uppercase font-bold">Name</label>
-                        <input
-                          type="text"
-                          value={col.name}
-                          onChange={(e) => updateSchemaColumn(col.id, 'name', e.target.value)}
-                          className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
-                        />
-                      </div>
-                      <div>
-                        <label className="text-[10px] text-gray-500 uppercase font-bold">Type</label>
-                        <select
-                          value={col.type}
-                          onChange={(e) => updateSchemaColumn(col.id, 'type', e.target.value)}
-                          className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
-                        >
-                          <option value="text">Text</option>
-                          <option value="rating">Rating</option>
-                          <option value="tier">Tier</option>
-                        </select>
-                      </div>
-                      {col.type === 'rating' && (
-                        <div className="grid grid-cols-2 gap-2">
-                          <div>
-                            <label className="text-[10px] text-gray-500 uppercase font-bold">Min</label>
-                            <input
-                              type="number"
-                              value={col.min || 0}
-                              onChange={(e) => updateSchemaColumn(col.id, 'min', parseInt(e.target.value))}
-                              className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
-                            />
-                          </div>
-                          <div>
-                            <label className="text-[10px] text-gray-500 uppercase font-bold">Max</label>
-                            <input
-                              type="number"
-                              value={col.max || 10}
-                              onChange={(e) => updateSchemaColumn(col.id, 'max', parseInt(e.target.value))}
-                              className="w-full px-2 py-1 text-xs border rounded dark:bg-gray-700 dark:border-gray-600"
-                            />
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="p-3 border-b dark:border-gray-700 bg-white dark:bg-gray-800 flex justify-between items-center">
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
-            >
-              {sidebarOpen ? <ChevronDown className="w-5 h-5 rotate-90" /> : <ChevronRight className="w-5 h-5" />}
-            </button>
-            <div>
-              <h1 className="text-lg font-bold">{data.name}</h1>
-              {data.description && <p className="text-xs text-gray-500">{data.description}</p>}
-            </div>
-          </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="px-3 py-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 flex items-center gap-2 text-sm font-medium"
-          >
-            <Plus className="w-4 h-4" /> Create Item
-          </button>
-        </div>
-
-        {/* Tier Grid */}
-        <div className="flex-1 overflow-y-auto p-3">
-          <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-2">
-            {tierColumn.options.map(tier => (
+      {/* Tier Grid */}
+      <div className="flex-1 overflow-y-auto pr-2 pb-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {tierColumn.options.map(tier => {
+             const colorClass = TIER_COLORS[tier] || TIER_COLORS.default;
+             // We want to use the background color for the header, but maybe a lighter version for the body?
+             // For now let's stick to a clean card look.
+             
+             return (
               <div
                 key={tier}
-                className="flex flex-col bg-white dark:bg-gray-800 rounded-lg border dark:border-gray-700 shadow-sm"
+                className="flex flex-col bg-white dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm overflow-hidden"
               >
                 {/* Tier Header */}
-                <div className="px-3 py-2 border-b dark:border-gray-700 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-t-lg">
-                  <h3 className="font-bold text-lg text-center">{tier}</h3>
+                <div className={`px-4 py-3 border-b border-zinc-100 dark:border-zinc-800 flex justify-between items-center ${
+                    dragOverTier === tier ? 'bg-indigo-50 dark:bg-indigo-900/20' : 'bg-zinc-50/50 dark:bg-zinc-900'
+                }`}>
+                  <div className="flex items-center gap-3">
+                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-lg shadow-sm ${colorClass}`}>
+                        {tier}
+                     </div>
+                     <span className="font-medium text-zinc-900 dark:text-zinc-100">
+                        {groupedItems[tier]?.length || 0} items
+                     </span>
+                  </div>
                 </div>
 
                 {/* Items Container */}
                 <div
-                  className={`flex-1 p-1.5 min-h-[150px] space-y-1.5 transition-colors ${
-                    dragOverTier === tier ? 'bg-blue-50 dark:bg-blue-900/20' : ''
+                  className={`flex-1 p-3 min-h-[200px] space-y-2 transition-colors ${
+                    dragOverTier === tier ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ''
                   }`}
                   onDragOver={(e) => {
                     e.preventDefault();
@@ -523,8 +262,11 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                   }}
                 >
                   {groupedItems[tier]?.length === 0 && dragOverTier !== tier && (
-                    <div className="flex items-center justify-center h-full text-gray-400 text-xs italic">
-                      Empty
+                    <div className="flex flex-col items-center justify-center h-full text-zinc-300 dark:text-zinc-700 gap-2 py-8">
+                      <div className="w-10 h-10 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+                         <Plus className="w-5 h-5" />
+                      </div>
+                      <span className="text-xs font-medium">Drop items here</span>
                     </div>
                   )}
 
@@ -560,48 +302,57 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                         setDragOverItem(null);
                         setDragOverTier(null);
                       }}
-                      className={`relative p-1.5 rounded bg-white dark:bg-gray-900 border cursor-move group transition-all ${
-                        draggingId === item.id ? 'opacity-40' : ''
+                      className={`relative p-3 rounded-lg bg-white dark:bg-zinc-800 border cursor-move group transition-all hover:shadow-md ${
+                        draggingId === item.id ? 'opacity-40 scale-95' : ''
                       } ${
                         dragOverItem?.id === item.id
-                          ? 'ring-2 ring-blue-400'
-                          : 'border-gray-200 dark:border-gray-700 hover:border-blue-300'
+                          ? 'ring-2 ring-indigo-500 border-transparent z-10'
+                          : 'border-zinc-200 dark:border-zinc-700/50 hover:border-indigo-300 dark:hover:border-indigo-700'
                       }`}
                     >
                       {/* Drop indicators */}
                       {dragOverItem?.id === item.id && dragOverItem.position === 'before' && (
-                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-blue-500 rounded-t z-10" />
+                        <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-500 rounded-t z-20" />
                       )}
                       {dragOverItem?.id === item.id && dragOverItem.position === 'after' && (
-                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500 rounded-b z-10" />
+                        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500 rounded-b z-20" />
                       )}
 
                       {/* Header */}
-                      <div className="flex justify-between items-center mb-1">
-                        <GripVertical className="w-3 h-3 text-gray-400 cursor-grab active:cursor-grabbing flex-shrink-0" />
+                      <div className="flex justify-between items-start gap-2 mb-1.5">
+                         <div className="flex items-center gap-2 min-w-0">
+                            <GripVertical className="w-4 h-4 text-zinc-300 dark:text-zinc-600 cursor-grab active:cursor-grabbing flex-shrink-0" />
+                            <div className="font-semibold text-sm text-zinc-900 dark:text-zinc-100 truncate leading-tight" title={item.name}>
+                                {item.name}
+                            </div>
+                         </div>
                         <button
                           onClick={() => deleteItem(item.id)}
-                          className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-zinc-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all p-0.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
                         >
-                          <X className="w-3 h-3" />
+                          <X className="w-3.5 h-3.5" />
                         </button>
                       </div>
 
-                      {/* Item Name */}
-                      <div className="font-semibold text-sm mb-1 px-1 truncate" title={item.name}>
-                        {item.name}
-                      </div>
-
                       {/* Compact stats */}
-                      <div className="text-[10px] text-gray-600 dark:text-gray-400 space-y-0.5">
+                      <div className="pl-6 text-[10px] text-zinc-500 dark:text-zinc-400 space-y-0.5">
                         {data.schema.map(col => {
                           if (col.type === 'tier') return null;
                           const value = item.values[col.id];
                           if (col.type === 'text' && !value) return null;
+                          if (col.type === 'rating') {
+                              return (
+                                <div key={col.id} className="flex items-center gap-1.5">
+                                  <span className="font-medium truncate opacity-70">{col.name}:</span>
+                                  <span className="text-amber-500 font-bold">{value}</span>
+                                  <span className="text-zinc-300">/ {col.max || 10}</span>
+                                </div>
+                              );
+                          }
                           return (
                             <div key={col.id} className="flex justify-between gap-1">
-                              <span className="font-medium truncate">{col.name}:</span>
-                              <span className="text-gray-900 dark:text-gray-100">{value}</span>
+                              <span className="font-medium truncate opacity-70">{col.name}:</span>
+                              <span className="text-zinc-700 dark:text-zinc-300 truncate max-w-[100px]">{value}</span>
                             </div>
                           );
                         })}
@@ -610,12 +361,12 @@ const CompactGuiTab = ({ data, setData, createdCategories, setCreatedCategories 
                   ))}
                 </div>
               </div>
-            ))}
-          </div>
+            );
+          })}
         </div>
       </div>
     </div>
   );
 };
 
-export default CompactGuiTab;
+export default GuiTab;

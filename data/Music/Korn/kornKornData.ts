@@ -1,4 +1,4 @@
-import { Category, TierList } from "@/app/page";
+import { Category, TierList } from "@/lib/types";
 
 const music: Category = {
     "id": "music",
