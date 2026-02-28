@@ -10,13 +10,12 @@ import ItemsTab from './tabs/ItemsTab';
 import SchemaTab from './tabs/SchemaTab';
 import GeneralTab from './tabs/GeneralTab';
 import { useTierlistMaker } from './state/useTierlistMaker';
-import { saveTierlistAction } from '@/app/actions';
 
 export default function TierlistMaker() {
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
     const { data, setData, createdCategories, setCreatedCategories } = useTierlistMaker();
     const [activeTab, setActiveTab] = useState<'general' | 'schema' | 'items' | 'preview' | 'code' | 'gui'>('general');
-    const [isPending, startTransition] = useTransition();
+    const [isPending] = useTransition();
 
     useEffect(() => {
         const storedTheme = localStorage.getItem('theme');
@@ -44,14 +43,23 @@ export default function TierlistMaker() {
             alert("Please provide an ID and Name in the General tab.");
             return;
         }
-        startTransition(async () => {
-            const result = await saveTierlistAction(data, createdCategories);
-            if (result.success) {
-                alert(result.message);
-            } else {
-                alert("Error: " + result.message);
-            }
-        });
+        
+        // In a static export (GitHub Pages), we can't use Server Actions or API routes to save to disk.
+        // Instead, we'll provide a JSON download that the user can place in the data/tierlists folder.
+        try {
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${data.id}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert(`Downloaded ${data.id}.json. To see it in the app, place this file in the 'data/tierlists' directory and restart the dev server.`);
+        } catch (e) {
+            console.error("Save failed:", e);
+            alert("Failed to save: " + e);
+        }
     };
 
     const navItems = [
@@ -137,7 +145,7 @@ export default function TierlistMaker() {
                         {activeTab === 'general' && <GeneralTab data={data} createdCategories={createdCategories} setData={setData} setCreatedCategories={setCreatedCategories} />}
                         {activeTab === 'schema' && <SchemaTab data={data} setData={setData} />}
                         {activeTab === 'items' && <ItemsTab data={data} setData={setData} />}
-                        {activeTab === 'gui' && <GuiTab data={data} setData={setData} createdCategories={createdCategories} setCreatedCategories={setCreatedCategories} />}
+                        {activeTab === 'gui' && <GuiTab data={data} setData={setData} />}
                         {activeTab === 'preview' && <PreviewTab data={data} />}
                         {activeTab === 'code' && <CodeTab data={data} createdCategories={createdCategories} />}
                     </div>

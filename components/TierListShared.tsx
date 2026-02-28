@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Star, ArrowUp, ArrowDown } from 'lucide-react';
-import { TierList, TierListItem, TierType } from '@/lib/types';
+import { TierList, TierListItem } from '@/lib/types';
 
 export const TIER_COLORS: Record<string, string> = {
   S: 'bg-red-500 border-red-600 text-white',
@@ -157,11 +157,11 @@ export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierl
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
-            {tierlist.items.map((item, idx) => (
+            {tierlist.items.map((item) => (
               <tr key={item.id} className="hover:bg-zinc-50 dark:hover:bg-zinc-800/30 transition-colors group">
                 <td className="px-6 py-3 font-medium text-zinc-900 dark:text-zinc-100 flex items-center gap-3">
                     <div className="w-6 h-6 rounded bg-zinc-200 dark:bg-zinc-700 flex-shrink-0 overflow-hidden">
-                       {item.imageUrl && <img src={item.imageUrl} className="w-full h-full object-cover" />}
+                       {item.imageUrl && <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />}
                     </div>
                     {item.name}
                 </td>

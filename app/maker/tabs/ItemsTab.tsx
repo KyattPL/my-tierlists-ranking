@@ -1,5 +1,5 @@
 import { TierList } from '@/lib/types';
-import { ArrowDown, ArrowUp, Plus, Trash2, Image as ImageIcon, GripVertical } from 'lucide-react';
+import { ArrowDown, ArrowUp, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 import React from 'react';
 
 interface Props {

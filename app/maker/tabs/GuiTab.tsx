@@ -1,17 +1,14 @@
 import React, { useState, useMemo, useCallback } from 'react';
-import { GripVertical, X, Plus, Trash2, ChevronDown, ChevronRight, FolderPlus, List, Columns } from 'lucide-react';
-import { TierList, Category, TierListItem } from '@/lib/types';
-import { tierlistData } from '@/data/tierlists-combined';
+import { GripVertical, X, Plus, ChevronDown, Columns } from 'lucide-react';
+import { TierList, TierListItem } from '@/lib/types';
 import { TIER_COLORS } from '@/components/TierListShared';
 
 interface Props {
   data: TierList;
   setData: React.Dispatch<React.SetStateAction<TierList>>;
-  createdCategories: Category[];
-  setCreatedCategories: React.Dispatch<React.SetStateAction<Category[]>>;
 }
 
-const GuiTab = ({ data, setData, createdCategories, setCreatedCategories }: Props) => {
+const GuiTab = ({ data, setData }: Props) => {
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverTier, setDragOverTier] = useState<string | null>(null);
   const [dragOverItem, setDragOverItem] = useState<{ id: string; position: 'before' | 'after' } | null>(null);

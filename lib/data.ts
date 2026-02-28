@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { AppNode, TierList, Category } from './types';
+import { AppNode } from './types';
 
 const DATA_DIR = path.join(process.cwd(), 'data/tierlists');
 

@@ -1,6 +1,6 @@
 import { AppNode } from "@/lib/types";
 
-const mockData: AppNode[] = [
+export const mockData: AppNode[] = [
     {
         id: "souls-universe",
         name: "Souls-like Universe",

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Clapperboard, Home, Sun, Moon, RefreshCw, ArrowLeft } from 'lucide-react';
+import { Clapperboard, Sun, Moon, RefreshCw, ArrowLeft } from 'lucide-react';
 
 interface CollectionHeaderProps {
     lastSync: string | null;

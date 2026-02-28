@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react'
-import { FolderPlus, Info } from 'lucide-react';
+import { FolderPlus } from 'lucide-react';
 
 import { Category, TierList } from '@/lib/types';
 import { tierlistData } from '@/data/tierlists-combined';

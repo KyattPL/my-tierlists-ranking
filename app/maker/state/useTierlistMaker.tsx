@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { AppNode, Category, TierList } from "@/lib/types";
+import { Category, TierList } from "@/lib/types";
 
 const DEFAULT_SCHEMA = [
   { id: "tier", name: "Tier", type: "tier" as const, options: ["S","A","B","C","D","F"] },

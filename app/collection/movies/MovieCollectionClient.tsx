@@ -2,7 +2,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { CollectionItem, ItemStatus } from './page';
-import { Search, Star, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Info, Clock, Film, Tv, PlayCircle, HelpCircle, Grid, List } from 'lucide-react';
+import { Search, Star, ArrowUp, ArrowDown, ChevronLeft, ChevronRight, Clock, Film, Tv, PlayCircle, HelpCircle, Grid, List } from 'lucide-react';
 
 const ITEMS_PER_PAGE = 24;
 
@@ -290,7 +290,7 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
                                         <td className="px-6 py-3 whitespace-nowrap">
                                             <div className="w-10 h-14 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden flex-shrink-0">
                                                 {item.poster && item.poster !== 'N/A' && !item.poster.includes('null') ? (
-                                                    <img src={item.poster} alt="" className="w-full h-full object-cover" />
+                                                    <img src={item.poster} alt={item.title} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-zinc-400">
                                                         <Film className="w-4 h-4" />
