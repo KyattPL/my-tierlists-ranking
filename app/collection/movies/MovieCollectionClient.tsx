@@ -209,7 +209,7 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
                             {/* Poster Area */}
                             <div className="aspect-[2/3] bg-zinc-100 dark:bg-zinc-800 relative overflow-hidden">
                                 {item.poster && item.poster !== 'N/A' && !item.poster.includes('null') ? (
-                                    <img src={item.poster} alt={item.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" loading="lazy" />
+                                    <img src={'/my-tierlists-ranking' + item.poster} alt={item.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" loading="lazy" />
                                 ) : (
                                     <div className={`absolute inset-0 bg-gradient-to-br from-zinc-200 to-zinc-300 dark:from-zinc-800 dark:to-zinc-900 flex items-center justify-center`}>
                                     {item.totalSeasons > 0 ? <Tv className="w-12 h-12 text-zinc-400" /> : <Film className="w-12 h-12 text-zinc-400" />}
@@ -290,7 +290,7 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
                                         <td className="px-6 py-3 whitespace-nowrap">
                                             <div className="w-10 h-14 bg-zinc-200 dark:bg-zinc-700 rounded overflow-hidden flex-shrink-0">
                                                 {item.poster && item.poster !== 'N/A' && !item.poster.includes('null') ? (
-                                                    <img src={item.poster} alt={item.title} className="w-full h-full object-cover" />
+                                                    <img src={'/my-tierlists-ranking' + item.poster} alt={item.title} className="w-full h-full object-cover" />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-zinc-400">
                                                         <Film className="w-4 h-4" />
