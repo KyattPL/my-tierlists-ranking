@@ -1,6 +1,7 @@
-import { Plus, Trash2, ArrowDown, Database } from 'lucide-react';
+import { Plus, Trash2, ArrowDown, Database, LayoutTemplate } from 'lucide-react';
 import React from 'react'
 import { TierList } from '@/lib/types';
+import { SCHEMA_PRESETS } from '../presets';
 
 interface Props {
     data: TierList;
@@ -21,6 +22,21 @@ const SchemaTab = ({ data, setData }: Props) => {
         setData(prev => ({ ...prev, schema: prev.schema.map(c => c.id === id ? { ...c, [field]: value } : c) }));
     };
 
+    const loadPreset = (presetId: string) => {
+        const preset = SCHEMA_PRESETS.find(p => p.id === presetId);
+        if (!preset) return;
+
+        if (data.schema.length > 0) {
+            if (!confirm("Loading a preset will replace your current schema. Continue?")) {
+                return;
+            }
+        }
+        
+        // Deep copy the preset schema to avoid reference issues
+        const newSchema = JSON.parse(JSON.stringify(preset.schema));
+        setData(prev => ({ ...prev, schema: newSchema }));
+    };
+
     return (
         <div className="max-w-4xl mx-auto">
             <div className="flex justify-between items-center mb-8">
@@ -34,6 +50,30 @@ const SchemaTab = ({ data, setData }: Props) => {
                 >
                     <Plus className="w-4 h-4" /> Add Column
                 </button>
+            </div>
+
+            {/* Presets Section */}
+            <div className="mb-8">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <LayoutTemplate className="w-4 h-4" />
+                    Quick Presets
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {SCHEMA_PRESETS.map((preset) => (
+                        <button
+                            key={preset.id}
+                            onClick={() => loadPreset(preset.id)}
+                            className="text-left p-3 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-sm transition-all group"
+                        >
+                            <div className="font-medium text-zinc-900 dark:text-zinc-100 text-sm group-hover:text-indigo-600 dark:group-hover:text-indigo-400">
+                                {preset.name}
+                            </div>
+                            <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                                {preset.description}
+                            </div>
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="space-y-4">
