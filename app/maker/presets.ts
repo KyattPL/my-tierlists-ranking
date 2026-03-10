@@ -1,10 +1,23 @@
-import { SchemaColumn } from "@/lib/types";
+﻿import { SchemaColumn } from "@/lib/types";
 
 export interface SchemaPreset {
     id: string;
     name: string;
     description: string;
     schema: SchemaColumn[];
+}
+
+export interface TierlistPreset {
+    id: string;
+    name: string;
+    description: string;
+    schema: SchemaColumn[];
+    defaults?: {
+        name?: string;
+        id?: string;
+        description?: string;
+        parentId?: string | null;
+    };
 }
 
 export const SCHEMA_PRESETS: SchemaPreset[] = [
@@ -58,5 +71,65 @@ export const SCHEMA_PRESETS: SchemaPreset[] = [
             { id: "soundtrack", name: "Soundtrack", type: "rating", min: 0, max: 10 },
             { id: "rewatchability", name: "Rewatch Value", type: "rating", min: 0, max: 10 }
         ]
+    }
+];
+
+const FALLBACK_SCHEMA: SchemaColumn[] = [
+    { id: "tier", name: "Tier", type: "tier", options: ["S", "A", "B", "C", "D", "F"] },
+    { id: "rating", name: "Rating", type: "rating", max: 10 },
+    { id: "notes", name: "Notes", type: "text" }
+];
+
+const getSchemaPreset = (id: string): SchemaColumn[] => {
+    return SCHEMA_PRESETS.find(preset => preset.id === id)?.schema ?? FALLBACK_SCHEMA;
+};
+
+export const TIERLIST_PRESETS: TierlistPreset[] = [
+    {
+        id: "music-album",
+        name: "Music Album",
+        description: "A music-focused template for ranking tracks or full albums.",
+        schema: getSchemaPreset("music"),
+        defaults: {
+            name: "Music Album Ranking",
+            id: "music-album",
+            description: "Rank the tracks from a music album.",
+            parentId: "music"
+        }
+    },
+    {
+        id: "game-bosses",
+        name: "Game Bosses",
+        description: "Built for ranking boss encounters by fairness, spectacle, and difficulty.",
+        schema: getSchemaPreset("boss"),
+        defaults: {
+            name: "Game Boss Rankings",
+            id: "game-bosses",
+            description: "Rank boss fights across games.",
+            parentId: "souls-bosses-category"
+        }
+    },
+    {
+        id: "video-game-review",
+        name: "Video Game Review",
+        description: "A deep-dive game review with gameplay, story, and presentation ratings.",
+        schema: getSchemaPreset("game"),
+        defaults: {
+            name: "Video Game Tierlist",
+            id: "video-game-tierlist",
+            description: "Rank games across the core pillars of the experience.",
+            parentId: "souls-universe"
+        }
+    },
+    {
+        id: "movies-tv",
+        name: "Movies / TV",
+        description: "A cinephile-flavored ranking preset for movies or TV seasons.",
+        schema: getSchemaPreset("movie"),
+        defaults: {
+            name: "Movies & TV Rankings",
+            id: "movies-tv",
+            description: "Rank movies or TV seasons by plot, pacing, and rewatchability."
+        }
     }
 ];

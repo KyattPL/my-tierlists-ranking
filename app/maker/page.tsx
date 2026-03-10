@@ -1,4 +1,4 @@
-"use client"
+﻿"use client"
 
 import React, { useEffect, useState, useTransition } from 'react';
 import { ArrowLeft, Code, Eye, Settings, Database, LayoutGrid, Moon, Sun, Save, Loader2, ListPlus } from 'lucide-react';
@@ -74,43 +74,46 @@ export default function TierlistMaker() {
     return (
         <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 flex flex-col font-sans">
             {/* Top Bar */}
-            <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 h-16 flex items-center justify-between px-6 sticky top-0 z-20">
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="p-2 -ml-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
-                    <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
-                    <h1 className="text-lg font-bold tracking-tight">Tierlist Maker</h1>
-                    <span className="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-xs font-medium">
-                        Beta
-                    </span>
-                </div>
-                
-                <div className="flex items-center gap-3">
-                    <button
-                        onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
-                        className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500 dark:text-zinc-400"
-                        aria-label="Toggle theme"
-                    >
-                        {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
-                    </button>
+            <header className="bg-white dark:bg-zinc-900 border-b border-zinc-200 dark:border-zinc-800 sticky top-0 z-20">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between px-4 sm:px-6 py-3 sm:py-0">
+                    <div className="flex items-center gap-3 flex-wrap">
+                        <Link href="/" className="p-2 -ml-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100">
+                            <ArrowLeft className="w-5 h-5" />
+                        </Link>
+                        <div className="hidden sm:block h-6 w-px bg-zinc-200 dark:bg-zinc-800" />
+                        <h1 className="text-lg font-bold tracking-tight">Tierlist Maker</h1>
+                        <span className="hidden sm:inline-flex px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-400 text-xs font-medium">
+                            Beta
+                        </span>
+                    </div>
                     
-                    <div className="h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
-                    
-                    <button 
-                        onClick={handleSave} 
-                        disabled={isPending}
-                        className="px-4 py-2 rounded-lg flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-sm shadow-sm hover:shadow-md hover:shadow-indigo-500/20 active:scale-95"
-                    >
-                        {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 
-                        <span>Save Tierlist</span>
-                    </button>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <button
+                            onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+                            className="p-2 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 transition-colors text-zinc-500 dark:text-zinc-400"
+                            aria-label="Toggle theme"
+                        >
+                            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5 text-amber-400" />}
+                        </button>
+                        
+                        <div className="hidden sm:block h-6 w-px bg-zinc-200 dark:bg-zinc-800 mx-1" />
+                        
+                        <button 
+                            onClick={handleSave} 
+                            disabled={isPending}
+                            className="px-3 sm:px-4 py-2 rounded-lg flex items-center gap-2 bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all font-medium text-sm shadow-sm hover:shadow-md hover:shadow-indigo-500/20 active:scale-95"
+                        >
+                            {isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />} 
+                            <span className="hidden sm:inline">Save Tierlist</span>
+                            <span className="sm:hidden">Save</span>
+                        </button>
+                    </div>
                 </div>
             </header>
 
             <div className="flex flex-1 overflow-hidden">
                 {/* Sidebar Navigation */}
-                <aside className="w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex flex-col">
+                <aside className="hidden md:flex md:w-64 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 flex-col">
                     <div className="p-4 space-y-1">
                         {navItems.map((item) => {
                             const Icon = item.icon;
@@ -140,7 +143,29 @@ export default function TierlistMaker() {
                 </aside>
 
                 {/* Main Content Area */}
-                <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-6 sm:p-8 lg:p-10">
+                <main className="flex-1 overflow-y-auto bg-zinc-50 dark:bg-zinc-950 p-4 sm:p-6 lg:p-10">
+                    <div className="md:hidden mb-4">
+                        <div className="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+                            {navItems.map((item) => {
+                                const Icon = item.icon;
+                                const isActive = activeTab === item.id;
+                                return (
+                                    <button
+                                        key={item.id}
+                                        onClick={() => setActiveTab(item.id)}
+                                        className={`shrink-0 flex items-center gap-2 px-3 py-2 rounded-full border text-xs font-semibold transition-all ${
+                                            isActive
+                                                ? 'bg-indigo-600 text-white border-indigo-600'
+                                                : 'bg-white dark:bg-zinc-900 border-zinc-200 dark:border-zinc-800 text-zinc-600 dark:text-zinc-300'
+                                        }`}
+                                    >
+                                        <Icon className="w-4 h-4" />
+                                        {item.label}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
                     <div className="max-w-5xl mx-auto">
                         {activeTab === 'general' && <GeneralTab data={data} createdCategories={createdCategories} setData={setData} setCreatedCategories={setCreatedCategories} />}
                         {activeTab === 'schema' && <SchemaTab data={data} setData={setData} />}

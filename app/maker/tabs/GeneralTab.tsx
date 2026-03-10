@@ -1,8 +1,9 @@
-import React, { useCallback, useMemo, useState } from 'react'
+﻿import React, { useCallback, useMemo, useState } from 'react'
 import { FolderPlus } from 'lucide-react';
 
 import { Category, TierList } from '@/lib/types';
 import { tierlistData } from '@/data/tierlists-combined';
+import { TIERLIST_PRESETS } from '../presets';
 
 interface Props {
     data: TierList;
@@ -10,6 +11,9 @@ interface Props {
     setData: React.Dispatch<React.SetStateAction<TierList>>;
     setCreatedCategories: React.Dispatch<React.SetStateAction<Category[]>>;
 }
+
+const DEFAULT_TIERLIST_ID = 'new-tierlist';
+const DEFAULT_TIERLIST_NAME = 'New Tierlist';
 
 const GeneralTab = ({ data, createdCategories, setData, setCreatedCategories }: Props) => {
     const [showCategoryCreator, setShowCategoryCreator] = useState(false);
@@ -19,6 +23,10 @@ const GeneralTab = ({ data, createdCategories, setData, setCreatedCategories }: 
         const existingCats = tierlistData.filter((n): n is Category => n.type === 'category');
         return [...existingCats, ...createdCategories];
     }, [createdCategories]);
+
+    const categoryLabelById = useMemo(() => {
+        return new Map(allCategories.map(category => [category.id, category.name]));
+    }, [allCategories]);
 
     const getHierarchicalOptions = useCallback((parentId: string | null = null, level = 0): { node: Category, level: number }[] => {
         const children = allCategories.filter(c => c.parentId === parentId);
@@ -59,11 +67,80 @@ const GeneralTab = ({ data, createdCategories, setData, setCreatedCategories }: 
         setShowCategoryCreator(false);
     };
 
+    const isDefaultSchema = data.schema.length === 3 && data.schema.every(col => {
+        if (col.id === 'tier' && col.type === 'tier') return true;
+        if (col.id === 'rating' && col.type === 'rating') return true;
+        if (col.id === 'notes' && col.type === 'text') return true;
+        return false;
+    });
+
+    const hasUserChanges = data.items.length > 0
+        || data.name !== DEFAULT_TIERLIST_NAME
+        || data.id !== DEFAULT_TIERLIST_ID
+        || (data.description ?? '') !== ''
+        || data.parentId !== null
+        || !isDefaultSchema;
+
+    const applyTierlistPreset = (preset: typeof TIERLIST_PRESETS[number]) => {
+        if (hasUserChanges) {
+            const confirmed = confirm("Applying a preset will replace your current schema and reset items. Continue?");
+            if (!confirmed) return;
+        }
+
+        const schemaCopy = JSON.parse(JSON.stringify(preset.schema));
+        const desiredParentId = preset.defaults?.parentId ?? null;
+        const resolvedParentId = desiredParentId && allCategories.some(cat => cat.id === desiredParentId)
+            ? desiredParentId
+            : null;
+
+        setData(prev => ({
+            ...prev,
+            name: preset.defaults?.name ?? prev.name,
+            id: preset.defaults?.id ?? prev.id,
+            description: preset.defaults?.description ?? prev.description,
+            parentId: desiredParentId ? (resolvedParentId ?? prev.parentId) : prev.parentId,
+            schema: schemaCopy,
+            items: []
+        }));
+    };
+
     return (
         <div className="max-w-3xl mx-auto">
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100">General Information</h2>
                 <p className="text-zinc-500 dark:text-zinc-400 mt-1">Basic details about your new tierlist.</p>
+            </div>
+
+            <div className="mb-8">
+                <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 uppercase tracking-wider mb-3">Tierlist Presets</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {TIERLIST_PRESETS.map((preset) => (
+                        <button
+                            key={preset.id}
+                            onClick={() => applyTierlistPreset(preset)}
+                            className="text-left p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900/50 hover:border-indigo-500 dark:hover:border-indigo-500 hover:shadow-sm transition-all"
+                        >
+                            <div className="font-medium text-zinc-900 dark:text-zinc-100 text-sm">
+                                {preset.name}
+                            </div>
+                            <div className="text-xs text-zinc-500 dark:text-zinc-400 mt-1 line-clamp-2">
+                                {preset.description}
+                            </div>
+                            {preset.defaults && (
+                                <div className="mt-2 text-[11px] text-zinc-400 space-y-1">
+                                    {preset.defaults.name && (
+                                        <div>Default name: {preset.defaults.name}</div>
+                                    )}
+                                    {preset.defaults.parentId && (
+                                        <div>
+                                            Parent: {categoryLabelById.get(preset.defaults.parentId) ?? preset.defaults.parentId}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </button>
+                    ))}
+                </div>
             </div>
             
             <div className="space-y-6 bg-white dark:bg-zinc-900 p-6 rounded-xl border border-zinc-200 dark:border-zinc-800 shadow-sm">
@@ -161,7 +238,7 @@ const GeneralTab = ({ data, createdCategories, setData, setCreatedCategories }: 
                                     <option value="">(Root Level)</option>
                                     {categoryOptions.map(({ node, level }) => (
                                         <option key={node.id} value={node.id}>
-                                            {'\u00A0'.repeat(level * 4)} {level > 0 ? '└ ' : ''} {node.name} {createdCategories.find(c => c.id === node.id) ? '(New)' : ''}
+                                            {'\u00A0'.repeat(level * 4)} {level > 0 ? '> ' : ''} {node.name} {createdCategories.find(c => c.id === node.id) ? '(New)' : ''}
                                         </option>
                                     ))}
                                 </select>
@@ -185,7 +262,7 @@ const GeneralTab = ({ data, createdCategories, setData, setCreatedCategories }: 
                             {categoryOptions.map(({ node, level }) => (
                             <option key={node.id} value={node.id}>
                                 {/* Visual indentation using non-breaking spaces */}
-                                {'\u00A0'.repeat(level * 4)} {level > 0 ? '└ ' : ''} {node.name} {createdCategories.find(c => c.id === node.id) ? '(New)' : ''}
+                                {'\u00A0'.repeat(level * 4)} {level > 0 ? '> ' : ''} {node.name} {createdCategories.find(c => c.id === node.id) ? '(New)' : ''}
                             </option>
                             ))}
                         </select>
