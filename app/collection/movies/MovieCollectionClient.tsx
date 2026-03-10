@@ -134,7 +134,7 @@ export default function MovieCollectionClient({ initialMovies }: { initialMovies
   return (
     <div className="space-y-6">
       {/* Controls Bar */}
-      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 py-4 px-4 sm:px-6 lg:px-8 shadow-sm space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between gap-4 sticky top-0 z-20 -mx-4 sm:-mx-6 lg:-mx-8 rounded-none sm:rounded-xl">
+      <div className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 p-4 shadow-sm space-y-4 lg:space-y-0 lg:flex lg:items-center lg:justify-between gap-4 rounded-xl">
         <div className="flex flex-col sm:flex-row gap-4 flex-1">
             <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-zinc-400" />
