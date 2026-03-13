@@ -1,11 +1,11 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { GripVertical, X, Plus, ChevronDown, Columns } from 'lucide-react';
-import { TierList, TierListItem } from '@/lib/types';
+import { TierListDraft, TierListItem } from '@/lib/types';
 import { TIER_COLORS } from '@/components/TierListShared';
 
 interface Props {
-  data: TierList;
-  setData: React.Dispatch<React.SetStateAction<TierList>>;
+  data: TierListDraft;
+  setData: React.Dispatch<React.SetStateAction<TierListDraft>>;
 }
 
 const GuiTab = ({ data, setData }: Props) => {

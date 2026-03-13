@@ -1,21 +1,9 @@
 [
 	{
-	  "id": "lamb-of-god",
-	  "name": "Lamb of God",
-	  "description": "Container for Lamb of God",
-	  "parentId": "metal",
-	  "children": [
-		"log-into-oblivion"
-	  ],
-	  "type": "category"
-	},
-	{
 	  "id": "log-into-oblivion",
 	  "name": "Lamb of God - Into Oblivion",
 	  "description": "Lamb of God - Into Oblivion",
-	  "parentId": "lamb-of-god",
 	  "type": "list",
-	  "children": [],
 	  "schema": [
 		{
 		  "id": "tier",

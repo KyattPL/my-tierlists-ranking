@@ -1,11 +1,11 @@
 import { Plus, Trash2, ArrowDown, Database, LayoutTemplate } from 'lucide-react';
 import React from 'react'
-import { TierList } from '@/lib/types';
+import { TierListDraft } from '@/lib/types';
 import { SCHEMA_PRESETS } from '../presets';
 
 interface Props {
-    data: TierList;
-    setData: React.Dispatch<React.SetStateAction<TierList>>;
+    data: TierListDraft;
+    setData: React.Dispatch<React.SetStateAction<TierListDraft>>;
 }
 
 const SchemaTab = ({ data, setData }: Props) => {

@@ -13,7 +13,7 @@ import { useTierlistMaker } from './state/useTierlistMaker';
 
 export default function TierlistMaker() {
     const [theme, setTheme] = useState<'light' | 'dark'>('light');
-    const { data, setData, createdCategories, setCreatedCategories } = useTierlistMaker();
+    const { data, setData } = useTierlistMaker();
     const [activeTab, setActiveTab] = useState<'general' | 'schema' | 'items' | 'preview' | 'code' | 'gui'>('general');
     const [isPending] = useTransition();
 
@@ -55,7 +55,7 @@ export default function TierlistMaker() {
             a.click();
             URL.revokeObjectURL(url);
             
-            alert(`Downloaded ${data.id}.json. To see it in the app, place this file in the 'data/tierlists' directory and restart the dev server.`);
+            alert(`Downloaded ${data.id}.json. To see it in the app, place this file anywhere under 'data/tierlists' (folders become categories automatically) and restart the dev server.`);
         } catch (e) {
             console.error("Save failed:", e);
             alert("Failed to save: " + e);
@@ -167,12 +167,12 @@ export default function TierlistMaker() {
                         </div>
                     </div>
                     <div className="max-w-5xl mx-auto">
-                        {activeTab === 'general' && <GeneralTab data={data} createdCategories={createdCategories} setData={setData} setCreatedCategories={setCreatedCategories} />}
+                        {activeTab === 'general' && <GeneralTab data={data} setData={setData} />}
                         {activeTab === 'schema' && <SchemaTab data={data} setData={setData} />}
                         {activeTab === 'items' && <ItemsTab data={data} setData={setData} />}
                         {activeTab === 'gui' && <GuiTab data={data} setData={setData} />}
                         {activeTab === 'preview' && <PreviewTab data={data} />}
-                        {activeTab === 'code' && <CodeTab data={data} createdCategories={createdCategories} />}
+                        {activeTab === 'code' && <CodeTab data={data} />}
                     </div>
                 </main>
             </div>

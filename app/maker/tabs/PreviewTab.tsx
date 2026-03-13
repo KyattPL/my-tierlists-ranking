@@ -1,9 +1,9 @@
-import { TierList } from '@/lib/types';
+import { TierListDraft } from '@/lib/types';
 import { TierlistView } from '@/components/TierListShared';
 import React from 'react'
 
 interface Props {
-    data: TierList;
+    data: TierListDraft;
 }
 
 const PreviewTab = ({ data }: Props) => {

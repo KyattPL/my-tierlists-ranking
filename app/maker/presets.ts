@@ -16,7 +16,6 @@ export interface TierlistPreset {
         name?: string;
         id?: string;
         description?: string;
-        parentId?: string | null;
     };
 }
 
@@ -93,8 +92,7 @@ export const TIERLIST_PRESETS: TierlistPreset[] = [
         defaults: {
             name: "Music Album Ranking",
             id: "music-album",
-            description: "Rank the tracks from a music album.",
-            parentId: "music"
+            description: "Rank the tracks from a music album."
         }
     },
     {
@@ -105,8 +103,7 @@ export const TIERLIST_PRESETS: TierlistPreset[] = [
         defaults: {
             name: "Game Boss Rankings",
             id: "game-bosses",
-            description: "Rank boss fights across games.",
-            parentId: "souls-bosses-category"
+            description: "Rank boss fights across games."
         }
     },
     {
@@ -117,8 +114,7 @@ export const TIERLIST_PRESETS: TierlistPreset[] = [
         defaults: {
             name: "Video Game Tierlist",
             id: "video-game-tierlist",
-            description: "Rank games across the core pillars of the experience.",
-            parentId: "souls-universe"
+            description: "Rank games across the core pillars of the experience."
         }
     },
     {

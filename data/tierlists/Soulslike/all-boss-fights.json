@@ -1,0 +1,18 @@
+{
+	"id": "all-boss-fights",
+	"name": "All Boss Fights",
+	"description": "Best boss fights across all games",
+	"type": "list",
+	"schema": [
+		{ "id": "tier", "name": "Tier", "type": "tier", "options": ["S", "A", "B", "C", "D", "F"] },
+		{ "id": "difficulty", "name": "Difficulty", "type": "rating", "max": 10 },
+		{ "id": "epicness", "name": "Epicness", "type": "rating", "max": 10 },
+		{ "id": "notes", "name": "Notes", "type": "text" }
+	],
+	"items": [
+		{ "id": "1", "name": "Malenia", "values": { "tier": "S", "difficulty": 10, "epicness": 10, "notes": "Hardest boss ever" } },
+		{ "id": "2", "name": "Orphan of Kos", "values": { "tier": "S", "difficulty": 10, "epicness": 9, "notes": "Brutal fight" } },
+		{ "id": "3", "name": "Isshin", "values": { "tier": "S", "difficulty": 10, "epicness": 10, "notes": "Perfect duel" } },
+		{ "id": "4", "name": "Artorias", "values": { "tier": "A", "difficulty": 7, "epicness": 9, "notes": "Iconic" } }
+	]
+}

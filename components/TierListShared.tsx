@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { Star, ArrowUp, ArrowDown } from 'lucide-react';
-import { TierList, TierListItem } from '@/lib/types';
+import { TierList, TierListDraft, TierListItem } from '@/lib/types';
 
 export const TIER_COLORS: Record<string, string> = {
   S: 'bg-red-500 border-red-600 text-white',
@@ -38,7 +38,9 @@ export const RatingStars = ({ value, max }: {value: number, max: number}) => (
   </div>
 );
 
-export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierlist: TierList; viewMode: 'tier' | 'table'; sortConfig: { key: string; direction: 'asc' | 'desc' } | null; onSort: (key: string) => void; }) => {
+type TierListLike = TierList | TierListDraft;
+
+export const TierlistView = ({ tierlist, viewMode, sortConfig, onSort }: { tierlist: TierListLike; viewMode: 'tier' | 'table'; sortConfig: { key: string; direction: 'asc' | 'desc' } | null; onSort: (key: string) => void; }) => {
   const groupedByTier = useMemo(() => {
     const tierColumn = tierlist.schema.find(col => col.type === 'tier');
     if (!tierColumn) return null;

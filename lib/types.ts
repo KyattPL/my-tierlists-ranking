@@ -34,4 +34,14 @@ export interface TierList extends BaseNode {
   items: TierListItem[];
 }
 
+// Maker/export-friendly shape with no derived hierarchy fields.
+export interface TierListDraft {
+  id: string;
+  name: string;
+  description?: string;
+  type: 'list';
+  schema: SchemaColumn[];
+  items: TierListItem[];
+}
+
 export type AppNode = Category | TierList;

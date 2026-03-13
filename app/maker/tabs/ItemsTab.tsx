@@ -1,10 +1,10 @@
-import { TierList } from '@/lib/types';
+import { TierListDraft } from '@/lib/types';
 import { ArrowDown, ArrowUp, Plus, Trash2, Image as ImageIcon } from 'lucide-react';
 import React from 'react';
 
 interface Props {
-    data: TierList;
-    setData: React.Dispatch<React.SetStateAction<TierList>>;
+    data: TierListDraft;
+    setData: React.Dispatch<React.SetStateAction<TierListDraft>>;
 }
 
 const ItemsTab = ({ data, setData }: Props) => {

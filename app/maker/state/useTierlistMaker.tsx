@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Category, TierList } from "@/lib/types";
+import { TierListDraft } from "@/lib/types";
 
 const DEFAULT_SCHEMA = [
   { id: "tier", name: "Tier", type: "tier" as const, options: ["S","A","B","C","D","F"] },
@@ -10,16 +10,11 @@ const DEFAULT_SCHEMA = [
 ];
 
 export function useTierlistMaker() {
-
-    const [createdCategories, setCreatedCategories] = useState<Category[]>([]);
-
-    const [data, setData] = useState<TierList>({
+    const [data, setData] = useState<TierListDraft>({
         id: "new-tierlist",
         name: "New Tierlist",
         description: "",
-        parentId: null,
         type: "list",
-        children: [],
         schema: DEFAULT_SCHEMA,
         items: []
     });
@@ -70,8 +65,6 @@ export function useTierlistMaker() {
         addItem,
         updateItemName,
         removeItem,
-        setItemValue,
-        createdCategories,
-        setCreatedCategories
+        setItemValue
     };
 }

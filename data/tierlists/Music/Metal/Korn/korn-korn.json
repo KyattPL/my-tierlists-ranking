@@ -1,21 +1,9 @@
 [
     {
-        "id": "korn",
-        "name": "Korn",
-        "description": "Container for Korn",
-        "parentId": "metal",
-        "children": [
-            "korn-korn"
-        ],
-        "type": "category"
-    },
-    {
         "id": "korn-korn",
         "name": "Korn - Korn",
         "description": "Tierlist about Korn's \"Korn\" album.",
-        "parentId": "korn",
         "type": "list",
-        "children": [],
         "schema": [
             {
                 "id": "tier",
