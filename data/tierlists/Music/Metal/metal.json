@@ -1,0 +1,11 @@
+{
+	"id": "metal",
+	"name": "Metal",
+	"description": "Container for Metal",
+	"parentId": "music",
+	"children": [
+		"korn",
+		"lamb-of-god"
+	],
+	"type": "category"
+}

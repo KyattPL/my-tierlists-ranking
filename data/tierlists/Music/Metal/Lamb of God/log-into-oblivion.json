@@ -1,0 +1,175 @@
+[
+	{
+	  "id": "lamb-of-god",
+	  "name": "Lamb of God",
+	  "description": "Container for Lamb of God",
+	  "parentId": "metal",
+	  "children": [
+		"log-into-oblivion"
+	  ],
+	  "type": "category"
+	},
+	{
+	  "id": "log-into-oblivion",
+	  "name": "Lamb of God - Into Oblivion",
+	  "description": "Lamb of God - Into Oblivion",
+	  "parentId": "lamb-of-god",
+	  "type": "list",
+	  "children": [],
+	  "schema": [
+		{
+		  "id": "tier",
+		  "name": "Tier",
+		  "type": "tier",
+		  "options": [
+			"S",
+			"A",
+			"B",
+			"C",
+			"D",
+			"F"
+		  ]
+		},
+		{
+		  "id": "feeling",
+		  "name": "The 'Goosebumps' Factor",
+		  "type": "rating",
+		  "min": 0,
+		  "max": 10
+		},
+		{
+		  "id": "vibe",
+		  "name": "Vibe (Fun/Listenability)",
+		  "type": "rating",
+		  "min": 0,
+		  "max": 10
+		},
+		{
+		  "id": "lyrics",
+		  "name": "Lyrics",
+		  "type": "rating",
+		  "min": 0,
+		  "max": 10
+		},
+		{
+		  "id": "originality",
+		  "name": "Originality (Uniqueness)",
+		  "type": "rating",
+		  "min": 0,
+		  "max": 10
+		}
+	  ],
+	  "items": [
+		{
+		  "id": "item_1773404207260",
+		  "name": "Blunt Force Blues",
+		  "values": {
+			"tier": "S",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404215760",
+		  "name": "Bully",
+		  "values": {
+			"tier": "S",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404149161",
+		  "name": "Into Oblivion",
+		  "values": {
+			"tier": "S",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404186227",
+		  "name": "El Vacío",
+		  "values": {
+			"tier": "S",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404162253",
+		  "name": "Parasocial Christ",
+		  "values": {
+			"tier": "B",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404169162",
+		  "name": "Sepsis",
+		  "values": {
+			"tier": "A",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404223592",
+		  "name": "A Thousand Years",
+		  "values": {
+			"tier": "A",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404198638",
+		  "name": "St. Catherine's Wheel",
+		  "values": {
+			"tier": "A",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404174777",
+		  "name": "The Killing Floor",
+		  "values": {
+			"tier": "S",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		},
+		{
+		  "id": "item_1773404233402",
+		  "name": "Devise / Destroy",
+		  "values": {
+			"tier": "B",
+			"feeling": 0,
+			"vibe": 0,
+			"lyrics": 0,
+			"originality": 0
+		  }
+		}
+	  ]
+	}
+]

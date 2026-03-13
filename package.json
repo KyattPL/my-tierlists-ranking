@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "node scripts/sync-data.js && next build --turbopack",
+    "build": "node scripts/sync-data.js && node scripts/fetch-posters.js && next build --turbopack",
     "start": "next start",
     "fetch-posters": "node scripts/fetch-posters.js"
   },

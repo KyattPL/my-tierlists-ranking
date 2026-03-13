@@ -4452,5 +4452,39 @@
     "status": "done",
     "myComment": "Rating after S1",
     "remember": true
+  },
+  {
+    "id": "tt14850054",
+    "title": "Greenland 2: Migration",
+    "year": 2026,
+    "genre": "Action, Adventure, Sci-Fi",
+    "director": "Ric Roman Waugh",
+    "actors": "Gerard Butler, Morena Baccarin, Roman Griffin Davis",
+    "imdbRating": 5.3,
+    "runtime": "98 min",
+    "poster": "/posters/tt14850054.jpg",
+    "totalSeasons": 0,
+    "country": "United Kingdom, United States",
+    "rating": 5,
+    "status": "undefined",
+    "myComment": "",
+    "remember": true
+  },
+  {
+    "id": "tt21880688",
+    "title": "La deuda",
+    "year": 2025,
+    "genre": "Drama, Thriller",
+    "director": "Daniel Guzmán",
+    "actors": "Rosario García, Daniel Guzmán, Susana Abaitua",
+    "imdbRating": 0,
+    "runtime": "109 min",
+    "poster": "/posters/tt21880688.jpg",
+    "totalSeasons": 0,
+    "country": "Spain",
+    "rating": 5.5,
+    "status": "undefined",
+    "myComment": "",
+    "remember": true
   }
 ]

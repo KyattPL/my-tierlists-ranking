@@ -1,25 +1,5 @@
 [
     {
-        "id": "music",
-        "name": "Music",
-        "description": "Container for Music",
-        "parentId": null,
-        "children": [
-            "metal"
-        ],
-        "type": "category"
-    },
-    {
-        "id": "metal",
-        "name": "Metal",
-        "description": "Container for Metal",
-        "parentId": "music",
-        "children": [
-            "korn"
-        ],
-        "type": "category"
-    },
-    {
         "id": "korn",
         "name": "Korn",
         "description": "Container for Korn",

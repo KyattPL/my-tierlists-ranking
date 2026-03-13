@@ -1,0 +1,10 @@
+{
+	"id": "music",
+	"name": "Music",
+	"description": "Container for Music",
+	"parentId": null,
+	"children": [
+		"metal"
+	],
+	"type": "category"
+}
